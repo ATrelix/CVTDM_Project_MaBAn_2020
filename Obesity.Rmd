@@ -1,0 +1,44 @@
+---
+title: "Data_Mining_Project_MaBAn_2020"
+author: "Ángel Tomás-Ripoll & Laurence Tréteault-Falsafi"
+date: "24/11/2020"
+output: html_document
+---
+
+```{r}
+
+library(pander)
+
+setwd("~/UNIGE/MASTERS/MaBAn/CVTDM/Project (Obesity)")
+
+obesity <- read.csv("Obesity.csv", header=T, sep=",")
+
+
+# Small metadata table :
+
+metadata = matrix(NA, nrow = 17, ncol = 1, dimnames = list(c(colnames(obesity)), "Description"))
+
+
+metadata[1,] = "Gender"
+metadata[2,] = "Age"
+metadata[3,] = "Height"
+metadata[4,] = "Weight"
+metadata[5,] = "Has a family member suffered or suffers from overweight?"
+metadata[6,] = "Do you eat high caloric food frequently?"
+metadata[7,] = "Do you usually eat vegetables in your meals?"
+metadata[8,] = "How many main meals do you have daily?"
+metadata[9,] = "Do you eat any food between meals?"
+metadata[10,] = "Do you smoke?"
+metadata[11,] = "How much water do you drink daily?"
+metadata[12,] = "Do you monitor the calories you eat daily?"
+metadata[13,] = "How often do you have physical activity?"
+metadata[14,] = "How much time do you use technological devices such as
+cell phone, videogames, television, computer and others?"
+metadata[15,] = "How often do you drink alcohol?"
+metadata[16,] = "Which transportation do you usually use?"
+metadata[17,] = "Obesity level based on calculation of Mass Body Index"
+
+  
+pander(metadata)
+```
+
