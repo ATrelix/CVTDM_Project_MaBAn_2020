@@ -1,9 +1,21 @@
 ---
-title: "Data_Mining_Project_MaBAn_2020"
-author: "Ángel Tomás-Ripoll & Laurence Tréteault-Falsafi"
-date: "24/11/2020"
-output: html_document
+title: "Data Mining Project (MaBAn 2020)"
+subtitle: "Predicting obesity level according to daily habits"
+
+author: "by : Ángel Tomás-Ripoll & Laurence Tréteault-Falsafi"
+
+output:
+  pdf_document:
+    toc: true
+  
+  
+
+  
 ---
+
+# Introduction
+
+##### For this project we will analyze 
 
 ```{r}
 
