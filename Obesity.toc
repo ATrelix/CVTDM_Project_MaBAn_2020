@@ -1,0 +1,23 @@
+\contentsline {section}{Introduction}{1}{section*.2}%
+\contentsline {subparagraph}{For this project, our objective is to predict the expected weigth level (in Kg) for a given person depending on certain daily habits (eating and physical activity) and on the person's age and height.}{1}{section*.3}%
+\contentsline {subparagraph}{To do this, we found a quite interesting dataset (click here : \url {http://archive.ics.uci.edu/ml/datasets/Estimation+of+obesity+levels+based+on+eating+habits+and+physical+condition+}) containing 2111 observations and 17 variables (mainly categorical).}{1}{section*.4}%
+\contentsline {subparagraph}{Please, find here a manually created metadata table :}{1}{section*.5}%
+\contentsline {subparagraph}{}{1}{section*.6}%
+\contentsline {subparagraph}{}{2}{table.1}%
+\contentsline {subparagraph}{}{3}{section*.7}%
+\contentsline {subparagraph}{}{3}{section*.7}%
+\contentsline {subparagraph}{The variable of interest is the fourth one, the ``Weight''.}{3}{section*.8}%
+\contentsline {subparagraph}{We were ``lucky'' on the fact that this dataset has a quite high level of quality, because it has no missing observations, and our subsequent exploratory analysis will tell us if there are outliers to be handled with.}{3}{section*.9}%
+\contentsline {subparagraph}{}{3}{section*.10}%
+\contentsline {subparagraph}{}{3}{section*.10}%
+\contentsline {subparagraph}{Once we are done with a Data Exploratory Analysis and with a proper Data Pre-Processing, we will develop several models in order to accurately predict the level of weight of each individual.}{3}{section*.11}%
+\contentsline {subparagraph}{The models will be :}{3}{section*.12}%
+\contentsline {subparagraph}{At the end, we will deploy the best model based on error metrics and prediction performance.}{3}{section*.13}%
+\contentsline {subparagraph}{}{3}{section*.14}%
+\contentsline {subparagraph}{}{3}{section*.14}%
+\contentsline {subparagraph}{At the very end, we will make available a \textbf {Shiny App} in which any user can fill-in a questionnaire concerning daily habits, age and height. Then, the App will tell the user what is the expected weight according to those characteristics, and will present the result in two forms :}{3}{section*.15}%
+\contentsline {subparagraph}{The user will also be able to \textbf {select the type of model} that will predict the results. That way, it will be interesting to see with just a few clicks how each model will yield different results.}{3}{section*.16}%
+\contentsline {subparagraph}{}{3}{section*.17}%
+\contentsline {subparagraph}{}{3}{section*.17}%
+\contentsline {subparagraph}{}{3}{section*.18}%
+\contentsline {subparagraph}{}{3}{section*.18}%
