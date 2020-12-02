@@ -41,7 +41,7 @@ library(dplyr)
 library(gt)
 library(car)
 library(ggplot2)
-source("VIF.R")
+library(gridExtra)
 
 # Working Directory :
 setwd("~/GitHub/CVTDM_Project_MaBAn_2020")
@@ -115,7 +115,95 @@ pander(head(obesity))
 # Data Pre-Processing
 
 
+##### The first thing to do is to change the column names so that they are more visually meaningful!
 
+##### {-}
+
+```{r}
+
+# Changing column names:
+
+names(obesity)[5] = "family_history"
+names(obesity)[6] = "eat_caloric"
+names(obesity)[7] = "vegetables"
+names(obesity)[8] = "main_meals"
+names(obesity)[9] = "food_inbetween"
+names(obesity)[12] = "monitor_cal"
+names(obesity)[13] = "physical_act"
+names(obesity)[14] = "tech_devices"
+names(obesity)[15] = "alcohol"
+
+```
+
+##### {-}
+
+```{r}
+
+# Checking the dataset structure :
+
+str(obesity)
+
+```
+
+##### {-}
+
+##### As we see here, all the categorical variables are treated as `character`.
+
+##### Therefore, we will first of all convert all the categorical variables to `factor` type.
+
+##### {-}
+
+```{r}
+
+# Converting character variables to factor :
+
+obesity$Gender = as.factor(obesity$Gender)
+obesity$family_history = as.factor(obesity$family_history)
+obesity$eat_caloric = as.factor(obesity$eat_caloric)
+obesity$food_inbetween = as.factor(obesity$food_inbetween)
+obesity$SMOKE = as.factor(obesity$SMOKE)
+obesity$monitor_cal = as.factor(obesity$monitor_cal)
+obesity$alcohol = as.factor(obesity$alcohol)
+obesity$MTRANS = as.factor(obesity$MTRANS)
+obesity$NObeyesdad = as.factor(obesity$NObeyesdad)
+
+```
+
+##### {-}
+
+##### Now, since many variables are in fact numerical and continuous between a range (for example `vegetables`, inside the range 1 to 3), we will transform them into categorical. This is, somehow, BINNING. For this, we will follow the names given in the information file refered to earlier (https://www.sciencedirect.com/science/article/pii/S2352340919306985).
+
+##### {-}
+
+```{r}
+
+# Binning some numerical variables :
+
+obesity$vegetables[obesity$vegetables <= 1] <- "Never"
+
+obesity$vegetables[obesity$vegetables > 1 & obesity$vegetables <=2] <- "Sometimes"
+
+obesity$vegetables[obesity$vegetables > 2 & obesity$vegetables <=3] <- "Always"
+
+
+
+obesity$main_meals[obesity$main_meals >= 1 & obesity$main_meals < 3] <- "Btw_1_&_2"
+
+obesity$main_meals[obesity$main_meals == 3] <- "Three"
+
+obesity$main_meals[obesity$main_meals > 3 & obesity$main_meals <= 4] <- "More_than_3"
+
+
+
+```
+
+##### {-}
+
+
+
+
+
+# Exploratory Data Analysis
 
 ##### {-}
 
@@ -137,8 +225,7 @@ ggplot(data=obesity, aes(x=NObeyesdad)) +
 
 ```{r}
 
-pander(summary(obesity))
-str(obesity)
+# Creating histograms :
 
 for (i in 2:4) {
   hist(
@@ -161,32 +248,57 @@ for (i in 2:4) {
     lty = 1
   )
 }
+
 ```
 
 ##### {-}
 
-##### Now, to have an idea of the distribution of the categorical variables, we will first replace the numbers with a string corresponding to its category, and then implement a `for` loop to get the frequencies.
+##### Now, let's do some barplots in order to get an idea of the distribution of each of the categorical variables.
 
 ##### {-}
 
 ```{r}
 
-obesity$FCVC[obesity$FCVC <= 1] <- 'Never'
+# Barplots :
 
-obesity$FCVC[obesity$FCVC > 1 & obesity$FCVC <=2] <- "Sometimes"
+plot_1 = ggplot(data=obesity, aes(x=NObeyesdad)) + 
+  geom_bar(aes(y = ..count.., group = 1)) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
 
-obesity$FCVC[obesity$FCVC > 2 & obesity$FCVC <=3] <- "Always"
+plot_2 = ggplot(data=obesity, aes(x=main_meals)) + 
+  geom_bar(aes(y = ..count.., group = 1)) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
+
+plot_3 = ggplot(data=obesity, aes(x=Gender)) + 
+  geom_bar(aes(y = ..count.., group = 1)) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
+
+plot_4 = ggplot(data=obesity, aes(x=family_history)) + 
+  geom_bar(aes(y = ..count.., group = 1)) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
+
+plot_5 = ggplot(data=obesity, aes(x=vegetables)) + 
+  geom_bar(aes(y = ..count.., group = 1)) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
+
+plot_6 = ggplot(data=obesity, aes(x=food_inbetween)) + 
+  geom_bar(aes(y = ..count.., group = 1)) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
 
 
 
-for (i in c(1, 5:10, 12, 15:17)){
-  x = count(obesity, obesity[, i], name = "Count")
-  colnames(x)[1] = colnames(obesity[i])
- 
-  
-}
+# Arranging them two-by-two :
 
-summary(as.factor(family_history_with_overweight))
+grid.arrange(plot_1, plot_2, ncol=2)
+grid.arrange(plot_3, plot_4, ncol=2)
+grid.arrange(plot_5, plot_6, ncol=2)
+
 ```
 
 
