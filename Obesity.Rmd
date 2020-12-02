@@ -39,7 +39,9 @@ opts_chunk$set(tidy.opts=list(width.cutoff=45),tidy=TRUE)
 library(pander)
 library(dplyr)
 library(gt)
-
+library(car)
+library(ggplot2)
+source("VIF.R")
 
 # Working Directory :
 setwd("~/GitHub/CVTDM_Project_MaBAn_2020")
@@ -47,7 +49,7 @@ setwd("~/GitHub/CVTDM_Project_MaBAn_2020")
 
 # Reading the data :
 obesity <- read.csv("Obesity.csv", header=T, sep=",")
-
+attach(obesity)
 
 
 
@@ -110,10 +112,83 @@ pander(head(obesity))
 
 ##### {-}
 
+# Data Pre-Processing
+
+
+
+
+##### {-}
+
 ```{r}
 
-
+ggplot(data=obesity, aes(x=NObeyesdad)) + 
+  geom_bar(aes(y = ..prop.., group = 1)) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
 
 ```
 
 ##### {-}
+
+##### We see that the distribution of observations across the different weights is quite uniform, meaning that we do not have an unbalanced data set with respect to our variable of interest (the weight).
+
+##### Let's now look at some histograms for all the continuous variables in our dataset.
+
+##### {-}
+
+```{r}
+
+pander(summary(obesity))
+str(obesity)
+
+for (i in 2:4) {
+  hist(
+    obesity[, i],
+    breaks = 10,
+    main = names(obesity[i]),
+    xlab = "value",
+    freq = T
+  )
+  abline(v = mean(obesity[, i]),
+         col = 1,
+         lwd = 2)
+  abline(v = median(obesity[, i]),
+         col = 2,
+         lwd = 2)
+  legend(
+    "topright",
+    legend = c("mean", "median"),
+    col = c("black", "red"),
+    lty = 1
+  )
+}
+```
+
+##### {-}
+
+##### Now, to have an idea of the distribution of the categorical variables, we will first replace the numbers with a string corresponding to its category, and then implement a `for` loop to get the frequencies.
+
+##### {-}
+
+```{r}
+
+obesity$FCVC[obesity$FCVC <= 1] <- 'Never'
+
+obesity$FCVC[obesity$FCVC > 1 & obesity$FCVC <=2] <- "Sometimes"
+
+obesity$FCVC[obesity$FCVC > 2 & obesity$FCVC <=3] <- "Always"
+
+
+
+for (i in c(1, 5:10, 12, 15:17)){
+  x = count(obesity, obesity[, i], name = "Count")
+  colnames(x)[1] = colnames(obesity[i])
+ 
+  
+}
+
+summary(as.factor(family_history_with_overweight))
+```
+
+
+
+

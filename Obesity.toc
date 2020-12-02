@@ -4,10 +4,10 @@
 \contentsline {subparagraph}{Please, find here a manually created metadata table :}{1}{section*.5}%
 \contentsline {subparagraph}{}{1}{section*.6}%
 \contentsline {subparagraph}{}{2}{section*.6}%
-\contentsline {subparagraph}{}{2}{section*.7}%
-\contentsline {subparagraph}{}{2}{section*.7}%
-\contentsline {subparagraph}{}{2}{section*.8}%
-\contentsline {subparagraph}{}{2}{section*.8}%
+\contentsline {subparagraph}{}{3}{section*.7}%
+\contentsline {subparagraph}{}{3}{section*.7}%
+\contentsline {subparagraph}{}{3}{section*.8}%
+\contentsline {subparagraph}{}{3}{section*.8}%
 \contentsline {subparagraph}{Here is a small overview of the first observations :}{3}{section*.9}%
 \contentsline {subparagraph}{}{3}{section*.10}%
 \contentsline {subparagraph}{}{3}{section*.10}%
@@ -20,5 +20,17 @@
 \contentsline {subparagraph}{The user will also be able to \textbf {select the type of model} that will predict the results. That way, it will be interesting to see with just a few clicks how each model will yield different results.}{4}{section*.17}%
 \contentsline {subparagraph}{}{4}{section*.18}%
 \contentsline {subparagraph}{}{4}{section*.18}%
-\contentsline {subparagraph}{}{4}{section*.19}%
-\contentsline {subparagraph}{}{4}{section*.19}%
+\contentsline {section}{Data Pre-Processing}{4}{section*.19}%
+\contentsline {subparagraph}{}{4}{section*.20}%
+\contentsline {subparagraph}{}{5}{section*.20}%
+\contentsline {subparagraph}{}{5}{section*.21}%
+\contentsline {subparagraph}{}{5}{section*.21}%
+\contentsline {subparagraph}{We see that the distribution of observations across the different weights is quite uniform, meaning that we do not have an unbalanced data set with respect to our variable of interest (the weight).}{5}{section*.22}%
+\contentsline {subparagraph}{Let's now look at some histograms for all the continuous variables in our dataset.}{5}{section*.23}%
+\contentsline {subparagraph}{}{5}{section*.24}%
+\contentsline {subparagraph}{}{5}{section*.24}%
+\contentsline {subparagraph}{}{8}{section*.25}%
+\contentsline {subparagraph}{}{8}{section*.25}%
+\contentsline {subparagraph}{Now, to have an idea of the distribution of the categorical variables, we will first replace the numbers with a string corresponding to its category, and then implement a \texttt {for} loop to get the frequencies.}{9}{section*.26}%
+\contentsline {subparagraph}{}{9}{section*.27}%
+\contentsline {subparagraph}{}{9}{section*.27}%
