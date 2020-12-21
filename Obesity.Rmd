@@ -42,6 +42,7 @@ library(gt)
 library(car)
 library(ggplot2)
 library(gridExtra)
+library(psych)
 
 # Working Directory :
 setwd("~/GitHub/CVTDM_Project_MaBAn_2020")
@@ -51,7 +52,7 @@ setwd("~/GitHub/CVTDM_Project_MaBAn_2020")
 obesity <- read.csv("Obesity.csv", header=T, sep=",")
 attach(obesity)
 
-
+summary(Obesity)
 
 # Small metadata table :
 
@@ -140,8 +141,9 @@ names(obesity)[15] = "alcohol"
 ```{r}
 
 # Checking the dataset structure :
-
 str(obesity)
+
+summary(obesity)
 
 ```
 
@@ -226,32 +228,15 @@ ggplot(data=obesity, aes(x=NObeyesdad)) +
 ```{r}
 
 # Creating histograms :
-
-for (i in 2:4) {
-  hist(
-    obesity[, i],
-    breaks = 10,
-    main = names(obesity[i]),
-    xlab = "value",
-    freq = T
-  )
-  abline(v = mean(obesity[, i]),
-         col = 1,
-         lwd = 2)
-  abline(v = median(obesity[, i]),
-         col = 2,
-         lwd = 2)
-  legend(
-    "topright",
-    legend = c("mean", "median"),
-    col = c("black", "red"),
-    lty = 1
-  )
-}
+multi.hist(obesity[,2:4], density = TRUE)
 
 ```
-
 ##### {-}
+
+#Interpretation:
+
+
+
 
 ##### Now, let's do some barplots in order to get an idea of the distribution of each of the categorical variables.
 
@@ -298,6 +283,7 @@ plot_6 = ggplot(data=obesity, aes(x=food_inbetween)) +
 grid.arrange(plot_1, plot_2, ncol=2)
 grid.arrange(plot_3, plot_4, ncol=2)
 grid.arrange(plot_5, plot_6, ncol=2)
+
 
 ```
 
