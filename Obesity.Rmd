@@ -2,7 +2,7 @@
 title: "Data Mining Project (MaBAn 2020)"
 subtitle: "Predicting obesity levels according to daily habits"
 
-author: "by : Ángel Tomás-Ripoll & Laurence Tréteault-Falsafi"
+author: "by : Ángel Tomás-Ripoll & Laurence Tétreault-Falsafi"
 
 output:
   pdf_document:
@@ -43,6 +43,9 @@ library(car)
 library(ggplot2)
 library(gridExtra)
 library(psych)
+library(corrplot)
+library(ellipse)
+library(dummies)
 
 # Working Directory :
 setwd("~/GitHub/CVTDM_Project_MaBAn_2020")
@@ -157,6 +160,7 @@ summary(obesity)
 
 ```{r}
 
+str(obesity)
 # Converting character variables to factor :
 
 obesity$Gender = as.factor(obesity$Gender)
@@ -169,6 +173,12 @@ obesity$alcohol = as.factor(obesity$alcohol)
 obesity$MTRANS = as.factor(obesity$MTRANS)
 obesity$NObeyesdad = as.factor(obesity$NObeyesdad)
 
+
+obesity$vegetables = as.factor(obesity$vegetables)
+obesity$main_meals= as.factor(obesity$main_meals)
+obesity$CH2O= as.factor(obesity$CH2O)
+obesity$physical_act= as.factor(obesity$physical_act)
+obesity$tech_devices= as.factor(obesity$tech_devices)
 ```
 
 ##### {-}
@@ -201,8 +211,14 @@ obesity$main_meals[obesity$main_meals > 3 & obesity$main_meals <= 4] <- "More_th
 
 ##### {-}
 
+```{r}
+#Removing Missing values
 
-
+na.omit(obesity)
+```
+##### {-}
+#There we no missing value within our data set
+##### {-}
 
 
 # Exploratory Data Analysis
@@ -226,7 +242,6 @@ ggplot(data=obesity, aes(x=NObeyesdad)) +
 ##### {-}
 
 ```{r}
-
 # Creating histograms :
 multi.hist(obesity[,2:4], density = TRUE)
 
@@ -287,6 +302,82 @@ grid.arrange(plot_5, plot_6, ncol=2)
 
 ```
 
+```{r}
+# Correlation plot
+cor.plot(na.omit(obesity))
+
+####Issue with correlation plot
+```
 
 
+```{r}
+#Dummyfing the binary variables(family_history, eat_caloric, SMOKE, and monitor_cal)
+
+#Gender
+obesity_dummy <- cbind(obesity[], dummy(obesity_dum$gender, sep = "_"), obesity[2:31])
+names(obesity_dummy)[6] <- c("family_hist")
+obesity_dummy <- subset(obesity_dummy, select = -c(5) )
+
+#family_history 1=yes 0=no
+obesity_dummy <- cbind( obesity[1:4], dummy(obesity$family_history, sep = "_"), obesity[6:17])
+names(obesity_dummy)[6] <- c("family_hist")
+obesity_dummy <- subset(obesity_dummy, select = -c(5) )
+
+
+#eat_caloric with 1=yes 0= no
+obesity_dummy <- cbind( obesity_dummy[1:5], dummy(obesity_dummy$eat_caloric, sep = "_"), obesity_dummy[7:17])
+names(obesity_dummy)[7] <- c("eat_caloric")
+obesity_dummy <- subset(obesity_dummy, select = -c(6) )
+
+
+#SMOKE 1=yes 0=no
+obesity_dummy <- cbind( obesity_dummy[1:9], dummy(obesity_dummy$SMOKE, sep = "_"), obesity_dummy[11:17])
+names(obesity_dummy)[11] <- c("smoke")
+obesity_dummy <- subset(obesity_dummy, select = -c(10) )
+
+#monitor_cal
+obesity_dummy <- cbind( obesity_dummy[1:11], dummy(obesity_dummy$monitor_cal, sep = "_"), obesity_dummy[13:17])
+names(obesity_dummy)[13] <- c("monitor_cal")
+obesity_dummy <- subset(obesity_dummy, select = -c(12) )
+
+
+#Dummmyfying the categorical variables
+
+#vegetables 
+obesity_dum <- cbind( obesity_dummy[1:6], dummy(obesity_dummy$vegetables, sep = "_"), obesity_dummy[8:17])
+names(obesity_dum)[7:9] <- c("vegetables_never","vegetables_sometimes","vegetable_always")
+
+#main_meals
+obesity_dum <- cbind( obesity_dum[1:9], dummy(obesity_dum$main_meals, sep = "_"), obesity_dum[11:19])
+names(obesity_dum)[10:12] <- c("main_meals_Btw_1_&_2","main_meals_More_than_3","main_meals_three")
+
+#food_in_between
+obesity_dum <- cbind( obesity_dum[1:12], dummy(obesity_dum$food_inbetween, sep = "_"), obesity_dum[14:21])
+names(obesity_dum)[13:16] <- c("food_inbetween_always","food_inbetween_frequently","food_inbetween_no", "food_inbetween_sometimes")
+
+#alcohol
+obesity_dum <- cbind( obesity_dum[1:21], dummy(obesity_dum$alcohol, sep = "_"), obesity_dum[23:24])
+names(obesity_dum)[22:25] <- c("alcohol_always","alcohol_frequently","alcohol_no", "alcohol_sometimes")
+
+#MTRANS
+str(obesity_dum)
+obesity_dum <- cbind( obesity_dum[1:25], dummy(obesity_dum$MTRANS, sep = "_"), obesity_dum[27])
+names(obesity_dum)[26:30] <- c("mtrans_automobile","mtrans_bike","mtrans_motorbike", "mtrans_public_transportation", "mtrans_walking")
+
+str(
+  obesity_dum
+)
+
+```
+
+
+
+
+
+## Data Analysis
+
+```{r}
+#Linear regression
+
+```
 
