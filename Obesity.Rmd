@@ -191,6 +191,7 @@ obesity$tech_devices= as.factor(obesity$tech_devices)
 
 # Binning some numerical variables :
 
+#vegetables 
 obesity$vegetables[obesity$vegetables <= 1] <- "Never"
 
 obesity$vegetables[obesity$vegetables > 1 & obesity$vegetables <=2] <- "Sometimes"
@@ -198,13 +199,37 @@ obesity$vegetables[obesity$vegetables > 1 & obesity$vegetables <=2] <- "Sometime
 obesity$vegetables[obesity$vegetables > 2 & obesity$vegetables <=3] <- "Always"
 
 
-
+#main_meals
 obesity$main_meals[obesity$main_meals >= 1 & obesity$main_meals < 3] <- "Btw_1_&_2"
 
 obesity$main_meals[obesity$main_meals == 3] <- "Three"
 
 obesity$main_meals[obesity$main_meals > 3 & obesity$main_meals <= 4] <- "More_than_3"
 
+
+#tech_devices
+obesity$tech_devices[obesity$tech_devices >= 0 & obesity$tech_devices <= 2] <- "0-2_hours"
+
+obesity$tech_devices[obesity$tech_devices >= 3 & obesity$tech_devices <= 5] <- "3-5_hours"
+
+obesity$main_meals[obesity$tech_devices > 5 ] <- "more_than_5_hours"
+
+#physical_act
+obesity$physical_act[obesity$physical_act < 1] <- "I do not have"
+
+obesity$physical_act[obesity$physical_act >= 1 & obesity$physical_act <= 2] <- "1 or 2 days"
+
+obesity$physical_act[obesity$physical_act >= 2 & obesity$physical_act <= 4] <- "2 or 4 days"
+
+obesity$physical_act[obesity$physical_act >= 4 & obesity$physical_act <= 5] <- "4 or 5 days"
+
+
+#CH2O
+obesity$CH2O[obesity$CH2O <= 1 ] <- "Less than a liter"
+
+obesity$CH2O[obesity$CH2O <= 2 ] <- "Between 1 and 2 L"
+
+obesity$CH2O[obesity$CH2O <=3 ] <- "More than 2 L"
 
 
 ```
@@ -313,10 +338,8 @@ cor.plot(na.omit(obesity))
 ```{r}
 #Dummyfing the binary variables(family_history, eat_caloric, SMOKE, and monitor_cal)
 
-#Gender
-obesity_dummy <- cbind(obesity[], dummy(obesity_dum$gender, sep = "_"), obesity[2:31])
-names(obesity_dummy)[6] <- c("family_hist")
-obesity_dummy <- subset(obesity_dummy, select = -c(5) )
+#Gender 1= female 0= male
+obesity_dummy$Gender <- dummy(obesity$Gender, sep = "_")
 
 #family_history 1=yes 0=no
 obesity_dummy <- cbind( obesity[1:4], dummy(obesity$family_history, sep = "_"), obesity[6:17])
@@ -335,7 +358,7 @@ obesity_dummy <- cbind( obesity_dummy[1:9], dummy(obesity_dummy$SMOKE, sep = "_"
 names(obesity_dummy)[11] <- c("smoke")
 obesity_dummy <- subset(obesity_dummy, select = -c(10) )
 
-#monitor_cal
+#monitor_cal 1=yes 0=no
 obesity_dummy <- cbind( obesity_dummy[1:11], dummy(obesity_dummy$monitor_cal, sep = "_"), obesity_dummy[13:17])
 names(obesity_dummy)[13] <- c("monitor_cal")
 obesity_dummy <- subset(obesity_dummy, select = -c(12) )
@@ -360,13 +383,24 @@ obesity_dum <- cbind( obesity_dum[1:21], dummy(obesity_dum$alcohol, sep = "_"), 
 names(obesity_dum)[22:25] <- c("alcohol_always","alcohol_frequently","alcohol_no", "alcohol_sometimes")
 
 #MTRANS
-str(obesity_dum)
 obesity_dum <- cbind( obesity_dum[1:25], dummy(obesity_dum$MTRANS, sep = "_"), obesity_dum[27])
 names(obesity_dum)[26:30] <- c("mtrans_automobile","mtrans_bike","mtrans_motorbike", "mtrans_public_transportation", "mtrans_walking")
 
-str(
-  obesity_dum
-)
+#CH2O
+obesity_dum <- cbind( obesity_dum[1:17], dummy(obesity_dum$CH2O, sep = "_"), obesity_dum[19:31])
+names(obesity_dum)[18:20] <- c("CH2O_less_than_a_liter","CH2O_between_1_and_2","CH2O_more_than_2")
+
+#physical_act
+obesity_dum <- cbind( obesity_dum[1:21], dummy(obesity_dum$physical_act, sep = "_"), obesity_dum[23:33])
+names(obesity_dum)[22:24] <- c("physical_act_do_not_have","physical_act_1_2","physical_act_2_4")
+
+#tech_devices : this one is a little bit tricky since there a many categories but only one is represented within the data
+obesity_dum <- cbind( obesity_dum[1:24], dummy(obesity_dum$tech_devices, sep = "_"), obesity_dum[26:35])
+names(obesity_dum)[25] <- c("tech_devices_0_2")
+
+#NObeyesdad
+obesity_dum <- cbind( obesity_dum[1:34], dummy(obesity_dum$NObeyesdad, sep = "_"))
+names(obesity_dum)[35:41] <- c("insufficient_weight", "normal_weight", "obesity_type_1", "obesity_type_2", "obesity_type_3", "overweight_level_1", "overweight_level_2")
 
 ```
 
@@ -377,7 +411,16 @@ str(
 ## Data Analysis
 
 ```{r}
+obesity_lm_dum <- subset(obesity_dum, select = c(1:34))
+
 #Linear regression
 
+lm_height <- lm(Height~ .,data = obesity_lm_dum)
+summary(lm_height)
+plot(lm_height)
+                       
+lm_weight <- lm(Weight ~., data = obesity_lm_dum)
+summary(lm_weight)
+plot(lm_weight)
 ```
 
