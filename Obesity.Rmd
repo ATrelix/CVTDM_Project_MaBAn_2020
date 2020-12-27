@@ -46,6 +46,7 @@ library(psych)
 library(corrplot)
 library(ellipse)
 library(dummies)
+library(nnet)
 
 # Working Directory :
 setwd("~/GitHub/CVTDM_Project_MaBAn_2020")
@@ -231,6 +232,9 @@ obesity$CH2O[obesity$CH2O <= 2 ] <- "Between 1 and 2 L"
 
 obesity$CH2O[obesity$CH2O <=3 ] <- "More than 2 L"
 
+#Gender
+#obesity$Gender[obesity$Gender == "Female"] <- 1
+#obesity$Gender[obesity$Gender == "Male"] <- 0
 
 ```
 
@@ -316,6 +320,10 @@ plot_6 = ggplot(data=obesity, aes(x=food_inbetween)) +
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
   geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
 
+plot_7 = ggplot(data=obesity, aes(x=tech_devices)) + 
+  geom_bar(aes(y = ..count.., group = 1)) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
 
 
 # Arranging them two-by-two :
@@ -329,8 +337,9 @@ grid.arrange(plot_5, plot_6, ncol=2)
 
 ```{r}
 # Correlation plot
-cor.plot(na.omit(obesity))
-
+cor.plot(na.omit(obesity [c(2,3,4)]))
+cor.plot(Obesity)
+str(obesity)
 ####Issue with correlation plot
 ```
 
@@ -339,10 +348,13 @@ cor.plot(na.omit(obesity))
 #Dummyfing the binary variables(family_history, eat_caloric, SMOKE, and monitor_cal)
 
 #Gender 1= female 0= male
-obesity_dummy$Gender <- dummy(obesity$Gender, sep = "_")
+obesity_dummy <- cbind(dummy(obesity$Gender, sep = "_"), obesity[2:17])
+names(obesity_dummy)[1] <- c("Gender")
+obesity_dummy <- subset(obesity_dummy, select = -c(2) )
+
 
 #family_history 1=yes 0=no
-obesity_dummy <- cbind( obesity[1:4], dummy(obesity$family_history, sep = "_"), obesity[6:17])
+obesity_dummy <- cbind( obesity_dummy[1:4], dummy(obesity_dummy$family_hist, sep = "_"), obesity_dummy[6:17])
 names(obesity_dummy)[6] <- c("family_hist")
 obesity_dummy <- subset(obesity_dummy, select = -c(5) )
 
@@ -415,12 +427,9 @@ obesity_lm_dum <- subset(obesity_dum, select = c(1:34))
 
 #Linear regression
 
-lm_height <- lm(Height~ .,data = obesity_lm_dum)
-summary(lm_height)
-plot(lm_height)
-                       
 lm_weight <- lm(Weight ~., data = obesity_lm_dum)
 summary(lm_weight)
 plot(lm_weight)
+
 ```
 
