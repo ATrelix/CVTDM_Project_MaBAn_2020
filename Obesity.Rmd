@@ -56,8 +56,6 @@ setwd("~/GitHub/CVTDM_Project_MaBAn_2020")
 obesity <- read.csv("Obesity.csv", header=T, sep=",")
 attach(obesity)
 
-summary(Obesity)
-
 # Small metadata table :
 
 tibble_table <- 
@@ -79,7 +77,6 @@ metadata %>%
 ```
 
 ##### {-}
-##### {-}
 
 ##### Here is a small overview of the first observations :
 
@@ -90,6 +87,8 @@ metadata %>%
 pander(head(obesity))
 
 ```
+
+##### {-}
 
 ##### The variable of interest is the fourth one, the "Weight", so it will be our dependent variable.
 
@@ -115,7 +114,9 @@ pander(head(obesity))
 
 ##### The user will also be able to **select the type of model** that will predict the results. That way, it will be interesting to see with just a few clicks how each model will yield different results.
 
+
 ##### {-}
+
 
 # Data Pre-Processing
 
@@ -145,41 +146,11 @@ names(obesity)[15] = "alcohol"
 ```{r}
 
 # Checking the dataset structure :
-str(obesity)
 
-summary(obesity)
+pander(str(obesity))
 
-```
+pander(summary(obesity))
 
-##### {-}
-
-##### As we see here, all the categorical variables are treated as `character`.
-
-##### Therefore, we will first of all convert all the categorical variables to `factor` type.
-
-##### {-}
-
-```{r}
-
-str(obesity)
-# Converting character variables to factor :
-
-obesity$Gender = as.factor(obesity$Gender)
-obesity$family_history = as.factor(obesity$family_history)
-obesity$eat_caloric = as.factor(obesity$eat_caloric)
-obesity$food_inbetween = as.factor(obesity$food_inbetween)
-obesity$SMOKE = as.factor(obesity$SMOKE)
-obesity$monitor_cal = as.factor(obesity$monitor_cal)
-obesity$alcohol = as.factor(obesity$alcohol)
-obesity$MTRANS = as.factor(obesity$MTRANS)
-obesity$NObeyesdad = as.factor(obesity$NObeyesdad)
-
-
-obesity$vegetables = as.factor(obesity$vegetables)
-obesity$main_meals= as.factor(obesity$main_meals)
-obesity$CH2O= as.factor(obesity$CH2O)
-obesity$physical_act= as.factor(obesity$physical_act)
-obesity$tech_devices= as.factor(obesity$tech_devices)
 ```
 
 ##### {-}
@@ -192,7 +163,9 @@ obesity$tech_devices= as.factor(obesity$tech_devices)
 
 # Binning some numerical variables :
 
+
 #vegetables 
+
 obesity$vegetables[obesity$vegetables <= 1] <- "Never"
 
 obesity$vegetables[obesity$vegetables > 1 & obesity$vegetables <=2] <- "Sometimes"
@@ -201,6 +174,7 @@ obesity$vegetables[obesity$vegetables > 2 & obesity$vegetables <=3] <- "Always"
 
 
 #main_meals
+
 obesity$main_meals[obesity$main_meals >= 1 & obesity$main_meals < 3] <- "Btw_1_&_2"
 
 obesity$main_meals[obesity$main_meals == 3] <- "Three"
@@ -209,13 +183,16 @@ obesity$main_meals[obesity$main_meals > 3 & obesity$main_meals <= 4] <- "More_th
 
 
 #tech_devices
+
 obesity$tech_devices[obesity$tech_devices >= 0 & obesity$tech_devices <= 2] <- "0-2_hours"
 
 obesity$tech_devices[obesity$tech_devices >= 3 & obesity$tech_devices <= 5] <- "3-5_hours"
 
 obesity$main_meals[obesity$tech_devices > 5 ] <- "more_than_5_hours"
 
+
 #physical_act
+
 obesity$physical_act[obesity$physical_act < 1] <- "I do not have"
 
 obesity$physical_act[obesity$physical_act >= 1 & obesity$physical_act <= 2] <- "1 or 2 days"
@@ -226,27 +203,62 @@ obesity$physical_act[obesity$physical_act >= 4 & obesity$physical_act <= 5] <- "
 
 
 #CH2O
+
 obesity$CH2O[obesity$CH2O <= 1 ] <- "Less than a liter"
 
 obesity$CH2O[obesity$CH2O <= 2 ] <- "Between 1 and 2 L"
 
 obesity$CH2O[obesity$CH2O <=3 ] <- "More than 2 L"
 
-#Gender
-#obesity$Gender[obesity$Gender == "Female"] <- 1
-#obesity$Gender[obesity$Gender == "Male"] <- 0
-
 ```
+
+##### {-}
+
+##### As we saw with the `str()` function, all the categorical variables are treated as `character`.
+
+##### Therefore, we will now convert all the categorical variables to `factor` type.
 
 ##### {-}
 
 ```{r}
-#Removing Missing values
 
-na.omit(obesity)
+# Converting character variables to factor :
+
+obesity$Gender = as.factor(obesity$Gender)
+obesity$family_history = as.factor(obesity$family_history)
+obesity$eat_caloric = as.factor(obesity$eat_caloric)
+obesity$food_inbetween = as.factor(obesity$food_inbetween)
+obesity$SMOKE = as.factor(obesity$SMOKE)
+obesity$monitor_cal = as.factor(obesity$monitor_cal)
+obesity$alcohol = as.factor(obesity$alcohol)
+obesity$MTRANS = as.factor(obesity$MTRANS)
+obesity$NObeyesdad = as.factor(obesity$NObeyesdad)
+obesity$vegetables = as.factor(obesity$vegetables)
+obesity$main_meals= as.factor(obesity$main_meals)
+obesity$CH2O= as.factor(obesity$CH2O)
+obesity$physical_act= as.factor(obesity$physical_act)
+obesity$tech_devices= as.factor(obesity$tech_devices)
+
 ```
+
 ##### {-}
-#There we no missing value within our data set
+
+##### Let's now remove any missing values.
+
+##### {-}
+
+```{r}
+
+# Checking if there are Missing Values :
+
+sum(is.na(obesity))
+
+```
+
+##### {-}
+
+##### There are no missing values within our dataset! So there is no need to remove any NA.
+
 ##### {-}
 
 
@@ -271,14 +283,18 @@ ggplot(data=obesity, aes(x=NObeyesdad)) +
 ##### {-}
 
 ```{r}
+
 # Creating histograms :
+
 multi.hist(obesity[,2:4], density = TRUE)
 
 ```
+
 ##### {-}
 
 #Interpretation:
 
+...
 
 
 
@@ -325,92 +341,146 @@ plot_7 = ggplot(data=obesity, aes(x=tech_devices)) +
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
   geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
 
+plot_8 = ggplot(data=obesity, aes(x=eat_caloric)) + 
+  geom_bar(aes(y = ..count.., group = 1)) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
+
+plot_9 = ggplot(data=obesity, aes(x=SMOKE)) + 
+  geom_bar(aes(y = ..count.., group = 1)) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
+
+plot_10 = ggplot(data=obesity, aes(x=CH2O)) + 
+  geom_bar(aes(y = ..count.., group = 1)) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
+
+plot_11 = ggplot(data=obesity, aes(x=monitor_cal)) + 
+  geom_bar(aes(y = ..count.., group = 1)) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
+
+plot_12 = ggplot(data=obesity, aes(x=physical_act)) + 
+  geom_bar(aes(y = ..count.., group = 1)) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
+
+plot_13 = ggplot(data=obesity, aes(x=alcohol)) + 
+  geom_bar(aes(y = ..count.., group = 1)) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
+
+plot_14 = ggplot(data=obesity, aes(x=MTRANS)) + 
+  geom_bar(aes(y = ..count.., group = 1)) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
+
 
 # Arranging them two-by-two :
 
 grid.arrange(plot_1, plot_2, ncol=2)
 grid.arrange(plot_3, plot_4, ncol=2)
 grid.arrange(plot_5, plot_6, ncol=2)
-
+grid.arrange(plot_7, plot_8, ncol=2)
+grid.arrange(plot_9, plot_10, ncol=2)
+grid.arrange(plot_11, plot_12, ncol=2)
+grid.arrange(plot_13, plot_14, ncol=2)
 
 ```
 
+##### {-}
+
+##### Let's look at the correlations between the variables.
+
+##### {-}
+
 ```{r}
+
 # Correlation plot
+
 cor.plot(na.omit(obesity [c(2,3,4)]))
-cor.plot(Obesity)
-str(obesity)
-####Issue with correlation plot
+
 ```
 
+##### {-}
 
-```{r}
-#Dummyfing the binary variables(family_history, eat_caloric, SMOKE, and monitor_cal)
+##### And now we dummify all the categorical and binary variables, in order to make them "ready" for the subsequent data analysis!
 
-#Gender 1= female 0= male
+##### {-}
+
+```{r message=FALSE, warning=FALSE}
+
+# Dummyfing the binary variables(family_history, eat_caloric, SMOKE, and monitor_cal) :
+
+# Gender 1 = female, 0 = male
 obesity_dummy <- cbind(dummy(obesity$Gender, sep = "_"), obesity[2:17])
 names(obesity_dummy)[1] <- c("Gender")
 obesity_dummy <- subset(obesity_dummy, select = -c(2) )
 
 
-#family_history 1=yes 0=no
+# family_history 1 = yes, 0 = no
 obesity_dummy <- cbind( obesity_dummy[1:4], dummy(obesity_dummy$family_hist, sep = "_"), obesity_dummy[6:17])
 names(obesity_dummy)[6] <- c("family_hist")
 obesity_dummy <- subset(obesity_dummy, select = -c(5) )
 
 
-#eat_caloric with 1=yes 0= no
+# eat_caloric with 1 = yes, 0 = no
 obesity_dummy <- cbind( obesity_dummy[1:5], dummy(obesity_dummy$eat_caloric, sep = "_"), obesity_dummy[7:17])
 names(obesity_dummy)[7] <- c("eat_caloric")
 obesity_dummy <- subset(obesity_dummy, select = -c(6) )
 
 
-#SMOKE 1=yes 0=no
+# SMOKE 1 = yes, 0 = no
 obesity_dummy <- cbind( obesity_dummy[1:9], dummy(obesity_dummy$SMOKE, sep = "_"), obesity_dummy[11:17])
 names(obesity_dummy)[11] <- c("smoke")
 obesity_dummy <- subset(obesity_dummy, select = -c(10) )
 
-#monitor_cal 1=yes 0=no
+
+# monitor_cal 1 = yes, 0 = no
 obesity_dummy <- cbind( obesity_dummy[1:11], dummy(obesity_dummy$monitor_cal, sep = "_"), obesity_dummy[13:17])
 names(obesity_dummy)[13] <- c("monitor_cal")
 obesity_dummy <- subset(obesity_dummy, select = -c(12) )
 
 
-#Dummmyfying the categorical variables
 
-#vegetables 
+# Dummmyfying the categorical variables
+
+# vegetables 
 obesity_dum <- cbind( obesity_dummy[1:6], dummy(obesity_dummy$vegetables, sep = "_"), obesity_dummy[8:17])
 names(obesity_dum)[7:9] <- c("vegetables_never","vegetables_sometimes","vegetable_always")
 
-#main_meals
+# main_meals
 obesity_dum <- cbind( obesity_dum[1:9], dummy(obesity_dum$main_meals, sep = "_"), obesity_dum[11:19])
 names(obesity_dum)[10:12] <- c("main_meals_Btw_1_&_2","main_meals_More_than_3","main_meals_three")
 
-#food_in_between
+# food_in_between
 obesity_dum <- cbind( obesity_dum[1:12], dummy(obesity_dum$food_inbetween, sep = "_"), obesity_dum[14:21])
 names(obesity_dum)[13:16] <- c("food_inbetween_always","food_inbetween_frequently","food_inbetween_no", "food_inbetween_sometimes")
 
-#alcohol
+# alcohol
 obesity_dum <- cbind( obesity_dum[1:21], dummy(obesity_dum$alcohol, sep = "_"), obesity_dum[23:24])
 names(obesity_dum)[22:25] <- c("alcohol_always","alcohol_frequently","alcohol_no", "alcohol_sometimes")
 
-#MTRANS
+# MTRANS
 obesity_dum <- cbind( obesity_dum[1:25], dummy(obesity_dum$MTRANS, sep = "_"), obesity_dum[27])
 names(obesity_dum)[26:30] <- c("mtrans_automobile","mtrans_bike","mtrans_motorbike", "mtrans_public_transportation", "mtrans_walking")
 
-#CH2O
+# CH2O
 obesity_dum <- cbind( obesity_dum[1:17], dummy(obesity_dum$CH2O, sep = "_"), obesity_dum[19:31])
 names(obesity_dum)[18:20] <- c("CH2O_less_than_a_liter","CH2O_between_1_and_2","CH2O_more_than_2")
 
-#physical_act
+# physical_act
 obesity_dum <- cbind( obesity_dum[1:21], dummy(obesity_dum$physical_act, sep = "_"), obesity_dum[23:33])
 names(obesity_dum)[22:24] <- c("physical_act_do_not_have","physical_act_1_2","physical_act_2_4")
 
-#tech_devices : this one is a little bit tricky since there a many categories but only one is represented within the data
+
+# tech_devices : this one is a little bit tricky since there a many categories but only one is represented within the data!
+
 obesity_dum <- cbind( obesity_dum[1:24], dummy(obesity_dum$tech_devices, sep = "_"), obesity_dum[26:35])
 names(obesity_dum)[25] <- c("tech_devices_0_2")
 
-#NObeyesdad
+# NObeyesdad
 obesity_dum <- cbind( obesity_dum[1:34], dummy(obesity_dum$NObeyesdad, sep = "_"))
 names(obesity_dum)[35:41] <- c("insufficient_weight", "normal_weight", "obesity_type_1", "obesity_type_2", "obesity_type_3", "overweight_level_1", "overweight_level_2")
 
@@ -420,12 +490,17 @@ names(obesity_dum)[35:41] <- c("insufficient_weight", "normal_weight", "obesity_
 
 
 
-## Data Analysis
+# Data Analysis
+
+## Multiple Linear Regression
+
+##### {-}
 
 ```{r}
+
 obesity_lm_dum <- subset(obesity_dum, select = c(1:34))
 
-#Linear regression
+# Linear regression
 
 lm_weight <- lm(Weight ~., data = obesity_lm_dum)
 summary(lm_weight)
