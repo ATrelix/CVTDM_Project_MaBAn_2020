@@ -47,6 +47,7 @@ library(corrplot)
 library(ellipse)
 library(dummies)
 library(nnet)
+library(class)
 
 # Working Directory :
 setwd("~/GitHub/CVTDM_Project_MaBAn_2020")
@@ -507,4 +508,232 @@ summary(lm_weight)
 plot(lm_weight)
 
 ```
+
+##### {-}
+
+
+
+
+
+
+
+
+
+
+
+
+## k-Nearest Neighbors
+
+##### Before continuing with the analysis, a data partitioning is necessary.
+
+##### Because the dataset is not very large (only 2111 observations), we judge it better to only proceed with partitioning into training and validation sets. However, better results would be obtained if we keep a third "test set".
+
+```{r}
+
+set.seed(1)
+
+# Partitioning the data (60% training, 40% validation)
+train.obs <- sample(rownames(obesity_dum), dim(obesity_dum)[1]*0.6)
+train.set <- obesity_dum[train.obs, ]  
+
+valid.obs <- setdiff(rownames(obesity_dum), train.obs)
+valid.set <- obesity_dum[valid.obs, ]
+
+```
+
+##### {-}
+
+##### But first of all, we should normalize the data, since we have different scales and big values can dominate small values! We normalize only the numerical data.
+
+```{r}
+
+# Normalizing the data :
+
+normalize <- function(x) {
+  return ((x - min(x)) / (max(x) - min(x)))
+}
+
+train.set.norm <- as.data.frame(lapply(train.set[, c(2:4)], normalize))
+
+valid.set.norm <- as.data.frame(lapply(valid.set[, c(2:4)], normalize))
+
+
+# Regrouping into final dataset, with replacement of non-normalized variables :
+
+train.final <- cbind(train.set.norm, train.set[, c(1, 5:41)])
+
+valid.final <- cbind(valid.set.norm, valid.set[, c(1, 5:41)])
+
+```
+
+##### {-}
+
+```{r}
+
+denormalize <- function(x, y) {
+  return ((x*(max(y)-min(y)))+min(y))
+}
+
+
+# Running the model to look for different values of RMSE :
+
+rmse.df = data.frame(k = seq(1, 40, 1), RMSE = rep(0, 40))
+
+
+for(i in 1:40){
+  
+  set.seed(1)
+  
+  knn.pred = knn(
+    train = train.final[, -3],
+    test = valid.final[, -3],
+    cl = train.final[, 3],
+    k = i
+  )
+  
+  k_nn = as.numeric(as.character(knn.pred))
+  
+  predicted = denormalize(k_nn, valid.set[, 4])
+  
+  rmse.df[i, 2] = sqrt(mean((predicted-valid.set[, 4])^2))
+}
+
+
+pander(rmse.df)
+
+plot(rmse.df$k, rmse.df$RMSE, xlab = "# of Neighbors", ylab = "RMSE", main = "Selecting the best 'k'")
+
+
+
+# Best is k = 2, so :
+
+set.seed(1)
+
+k_nn <-
+  knn(
+    train = train.final[, -3],
+    test = valid.final[, -3],
+    cl = train.final[, 3],
+    k = 2
+  )
+
+k_nn = as.numeric(as.character(k_nn))
+
+predicted = denormalize(k_nn, valid.set[, 4])
+
+
+RMSE = sqrt(mean((predicted-valid.set[, 4])^2))
+
+RMSE
+
+
+
+
+# Creating a person for prediction :
+
+example.df = obesity[1,]
+
+example.df$Gender = "Male"
+example.df$Age = 25
+example.df$Height = 1.78
+example.df$Weight = 70.0
+example.df$family_history = "no"
+example.df$eat_caloric = "no"
+example.df$vegetables = "Always"
+example.df$main_meals = "More_than_3"
+example.df$food_inbetween = "no"
+example.df$SMOKE = "no"
+example.df$CH2O = "Between 1 and 2 L	"
+example.df$monitor_cal = "no"
+example.df$physical_act = "2 or 4 days"
+example.df$tech_devices = "0-2_hours	"
+example.df$alcohol = "no"
+example.df$MTRANS = "Walking"
+example.df$NObeyesdad = "Normal_weight"
+
+
+norm.values <- preProcess(obesity[, c(2:4)], method = "range")
+
+example.norm <- predict(norm.values, example.df)
+
+
+
+
+# Dummyfing the binary variables(family_history, eat_caloric, SMOKE, and monitor_cal) :
+
+# Gender 1 = female, 0 = male
+ex <- cbind(dummy(example.df$Gender, sep = "_"), example.df[2:17])
+names(ex)[1] <- c("Gender")
+
+
+# family_history 1 = yes, 0 = no
+ex <- cbind( example.df[1:4], dummy(example.df$family_hist, sep = "_"), example.df[6:17])
+names(ex)[5] <- c("family_hist")
+
+
+
+# eat_caloric with 1 = yes, 0 = no
+ex <- cbind( example.df[1:5], dummy(example.df$eat_caloric, sep = "_"), example.df[7:17])
+names(ex)[6] <- c("eat_caloric")
+
+
+
+# SMOKE 1 = yes, 0 = no
+ex <- cbind( example.df[1:9], dummy(example.df$SMOKE, sep = "_"), example.df[11:17])
+names(ex)[10] <- c("smoke")
+
+
+
+# monitor_cal 1 = yes, 0 = no
+ex <- cbind( example.df[1:11], dummy(example.df$monitor_cal, sep = "_"), example.df[13:17])
+names(ex)[12] <- c("monitor_cal")
+
+
+
+
+# Dummmyfying the categorical variables
+
+# vegetables 
+ex <- cbind( example.df[1:6], dummy(example.df$vegetables, sep = "_"), example.df[8:17])
+names(ex)[7:9] <- c("vegetables_never","vegetables_sometimes","vegetable_always")
+
+# main_meals
+obesity_dum <- cbind( example.df[1:9], dummy(example.df$main_meals, sep = "_"), example.df[11:19])
+names(obesity_dum)[10:12] <- c("main_meals_Btw_1_&_2","main_meals_More_than_3","main_meals_three")
+
+# food_in_between
+obesity_dum <- cbind( example.df[1:12], dummy(example.df$food_inbetween, sep = "_"), example.df[14:21])
+names(obesity_dum)[13:16] <- c("food_inbetween_always","food_inbetween_frequently","food_inbetween_no", "food_inbetween_sometimes")
+
+# alcohol
+obesity_dum <- cbind( example.df[1:21], dummy(example.df$alcohol, sep = "_"), example.df[23:24])
+names(obesity_dum)[22:25] <- c("alcohol_always","alcohol_frequently","alcohol_no", "alcohol_sometimes")
+
+# MTRANS
+obesity_dum <- cbind( example.df[1:25], dummy(example.df$MTRANS, sep = "_"), example.df[27])
+names(obesity_dum)[26:30] <- c("mtrans_automobile","mtrans_bike","mtrans_motorbike", "mtrans_public_transportation", "mtrans_walking")
+
+# CH2O
+obesity_dum <- cbind( example.df[1:17], dummy(example.df$CH2O, sep = "_"), example.df[19:31])
+names(obesity_dum)[18:20] <- c("CH2O_less_than_a_liter","CH2O_between_1_and_2","CH2O_more_than_2")
+
+# physical_act
+obesity_dum <- cbind( example.df[1:21], dummy(example.df$physical_act, sep = "_"), example.df[23:33])
+names(obesity_dum)[22:24] <- c("physical_act_do_not_have","physical_act_1_2","physical_act_2_4")
+
+
+# tech_devices : this one is a little bit tricky since there a many categories but only one is represented within the data!
+
+obesity_dum <- cbind( example.df[1:24], dummy(example.df$tech_devices, sep = "_"), example.df[26:35])
+names(obesity_dum)[25] <- c("tech_devices_0_2")
+
+# NObeyesdad
+obesity_dum <- cbind( example.df[1:34], dummy(example.df$NObeyesdad, sep = "_"))
+names(obesity_dum)[35:41] <- c("insufficient_weight", "normal_weight", "obesity_type_1", "obesity_type_2", "obesity_type_3", "overweight_level_1", "overweight_level_2")
+
+
+
+```
+
+#Weird! If we change the set.seed, the results for RMSE change!! So, which set.seed to choose?
 
