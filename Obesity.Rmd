@@ -48,6 +48,7 @@ library(ellipse)
 library(dummies)
 library(nnet)
 library(class)
+library(caret)
 
 # Working Directory :
 setwd("~/GitHub/CVTDM_Project_MaBAn_2020")
@@ -165,51 +166,60 @@ pander(summary(obesity))
 # Binning some numerical variables :
 
 
-#vegetables 
+binning <- function(x) {
+  
+  #vegetables 
 
-obesity$vegetables[obesity$vegetables <= 1] <- "Never"
+x$vegetables[x$vegetables <= 1] <- "Never"
 
-obesity$vegetables[obesity$vegetables > 1 & obesity$vegetables <=2] <- "Sometimes"
+x$vegetables[x$vegetables > 1 & x$vegetables <=2] <- "Sometimes"
 
-obesity$vegetables[obesity$vegetables > 2 & obesity$vegetables <=3] <- "Always"
+x$vegetables[x$vegetables > 2 & x$vegetables <=3] <- "Always"
 
 
 #main_meals
 
-obesity$main_meals[obesity$main_meals >= 1 & obesity$main_meals < 3] <- "Btw_1_&_2"
+x$main_meals[x$main_meals >= 1 & x$main_meals < 3] <- "Btw_1_&_2"
 
-obesity$main_meals[obesity$main_meals == 3] <- "Three"
+x$main_meals[x$main_meals == 3] <- "Three"
 
-obesity$main_meals[obesity$main_meals > 3 & obesity$main_meals <= 4] <- "More_than_3"
+x$main_meals[x$main_meals > 3 & x$main_meals <= 4] <- "More_than_3"
 
 
 #tech_devices
 
-obesity$tech_devices[obesity$tech_devices >= 0 & obesity$tech_devices <= 2] <- "0-2_hours"
+x$tech_devices[x$tech_devices >= 0 & x$tech_devices <= 0.5] <- "0_hours"
 
-obesity$tech_devices[obesity$tech_devices >= 3 & obesity$tech_devices <= 5] <- "3-5_hours"
+x$tech_devices[x$tech_devices >= 0.5 & x$tech_devices <= 1.5] <- "1_hour"
 
-obesity$main_meals[obesity$tech_devices > 5 ] <- "more_than_5_hours"
+x$tech_devices[x$tech_devices > 1.5 ] <- "2_hours_or_more"
 
 
 #physical_act
 
-obesity$physical_act[obesity$physical_act < 1] <- "I do not have"
+x$physical_act[x$physical_act < 1] <- "I do not have"
 
-obesity$physical_act[obesity$physical_act >= 1 & obesity$physical_act <= 2] <- "1 or 2 days"
+x$physical_act[x$physical_act >= 1 & x$physical_act <= 2] <- "1 or 2 days"
 
-obesity$physical_act[obesity$physical_act >= 2 & obesity$physical_act <= 4] <- "2 or 4 days"
+x$physical_act[x$physical_act >= 2 & x$physical_act <= 4] <- "2 or 4 days"
 
-obesity$physical_act[obesity$physical_act >= 4 & obesity$physical_act <= 5] <- "4 or 5 days"
+x$physical_act[x$physical_act >= 4 & x$physical_act <= 5] <- "4 or 5 days"
 
 
 #CH2O
 
-obesity$CH2O[obesity$CH2O <= 1 ] <- "Less than a liter"
+x$CH2O[x$CH2O <= 1 ] <- "Less than a liter"
 
-obesity$CH2O[obesity$CH2O <= 2 ] <- "Between 1 and 2 L"
+x$CH2O[x$CH2O <= 2 ] <- "Between 1 and 2 L"
 
-obesity$CH2O[obesity$CH2O <=3 ] <- "More than 2 L"
+x$CH2O[x$CH2O <=3 ] <- "More than 2 L"
+
+return(x)  
+  
+}
+
+obesity = binning(obesity)
+
 
 ```
 
@@ -225,20 +235,29 @@ obesity$CH2O[obesity$CH2O <=3 ] <- "More than 2 L"
 
 # Converting character variables to factor :
 
-obesity$Gender = as.factor(obesity$Gender)
-obesity$family_history = as.factor(obesity$family_history)
-obesity$eat_caloric = as.factor(obesity$eat_caloric)
-obesity$food_inbetween = as.factor(obesity$food_inbetween)
-obesity$SMOKE = as.factor(obesity$SMOKE)
-obesity$monitor_cal = as.factor(obesity$monitor_cal)
-obesity$alcohol = as.factor(obesity$alcohol)
-obesity$MTRANS = as.factor(obesity$MTRANS)
-obesity$NObeyesdad = as.factor(obesity$NObeyesdad)
-obesity$vegetables = as.factor(obesity$vegetables)
-obesity$main_meals= as.factor(obesity$main_meals)
-obesity$CH2O= as.factor(obesity$CH2O)
-obesity$physical_act= as.factor(obesity$physical_act)
-obesity$tech_devices= as.factor(obesity$tech_devices)
+
+to_factor <- function(x) {
+  
+x$Gender = as.factor(x$Gender)
+x$family_history = as.factor(x$family_history)
+x$eat_caloric = as.factor(x$eat_caloric)
+x$food_inbetween = as.factor(x$food_inbetween)
+x$SMOKE = as.factor(x$SMOKE)
+x$monitor_cal = as.factor(x$monitor_cal)
+x$alcohol = as.factor(x$alcohol)
+x$MTRANS = as.factor(x$MTRANS)
+x$NObeyesdad = as.factor(x$NObeyesdad)
+x$vegetables = as.factor(x$vegetables)
+x$main_meals= as.factor(x$main_meals)
+x$CH2O= as.factor(x$CH2O)
+x$physical_act= as.factor(x$physical_act)
+x$tech_devices= as.factor(x$tech_devices)
+
+return(x)
+
+}
+
+obesity = to_factor(obesity)
 
 ```
 
@@ -412,6 +431,7 @@ cor.plot(na.omit(obesity [c(2,3,4)]))
 
 ```{r message=FALSE, warning=FALSE}
 
+
 # Dummyfing the binary variables(family_history, eat_caloric, SMOKE, and monitor_cal) :
 
 # Gender 1 = female, 0 = male
@@ -530,12 +550,15 @@ plot(lm_weight)
 
 ```{r}
 
+# Partitioning the data (60% training, 40% validation)
+
 set.seed(1)
 
-# Partitioning the data (60% training, 40% validation)
 train.obs <- sample(rownames(obesity_dum), dim(obesity_dum)[1]*0.6)
 train.set <- obesity_dum[train.obs, ]  
 
+set.seed(1)
+ 
 valid.obs <- setdiff(rownames(obesity_dum), train.obs)
 valid.set <- obesity_dum[valid.obs, ]
 
@@ -571,7 +594,9 @@ valid.final <- cbind(valid.set.norm, valid.set[, c(1, 5:41)])
 ```{r}
 
 denormalize <- function(x, y) {
-  return ((x*(max(y)-min(y)))+min(y))
+  
+  return ((x*(max(y) - min(y))) + min(y))
+  
 }
 
 
@@ -580,9 +605,9 @@ denormalize <- function(x, y) {
 rmse.df = data.frame(k = seq(1, 40, 1), RMSE = rep(0, 40))
 
 
+set.seed(1)
+
 for(i in 1:40){
-  
-  set.seed(1)
   
   knn.pred = knn(
     train = train.final[, -3],
@@ -605,7 +630,7 @@ plot(rmse.df$k, rmse.df$RMSE, xlab = "# of Neighbors", ylab = "RMSE", main = "Se
 
 
 
-# Best is k = 2, so :
+# Best is k = 1, so :
 
 set.seed(1)
 
@@ -614,7 +639,7 @@ k_nn <-
     train = train.final[, -3],
     test = valid.final[, -3],
     cl = train.final[, 3],
-    k = 2
+    k = 1
   )
 
 k_nn = as.numeric(as.character(k_nn))
@@ -643,10 +668,10 @@ example.df$vegetables = "Always"
 example.df$main_meals = "More_than_3"
 example.df$food_inbetween = "no"
 example.df$SMOKE = "no"
-example.df$CH2O = "Between 1 and 2 L	"
+example.df$CH2O = "Between 1 and 2 L"
 example.df$monitor_cal = "no"
 example.df$physical_act = "2 or 4 days"
-example.df$tech_devices = "0-2_hours	"
+example.df$tech_devices = "0-2_hours"
 example.df$alcohol = "no"
 example.df$MTRANS = "Walking"
 example.df$NObeyesdad = "Normal_weight"
@@ -657,79 +682,7 @@ norm.values <- preProcess(obesity[, c(2:4)], method = "range")
 example.norm <- predict(norm.values, example.df)
 
 
-
-
-# Dummyfing the binary variables(family_history, eat_caloric, SMOKE, and monitor_cal) :
-
-# Gender 1 = female, 0 = male
-ex <- cbind(dummy(example.df$Gender, sep = "_"), example.df[2:17])
-names(ex)[1] <- c("Gender")
-
-
-# family_history 1 = yes, 0 = no
-ex <- cbind( example.df[1:4], dummy(example.df$family_hist, sep = "_"), example.df[6:17])
-names(ex)[5] <- c("family_hist")
-
-
-
-# eat_caloric with 1 = yes, 0 = no
-ex <- cbind( example.df[1:5], dummy(example.df$eat_caloric, sep = "_"), example.df[7:17])
-names(ex)[6] <- c("eat_caloric")
-
-
-
-# SMOKE 1 = yes, 0 = no
-ex <- cbind( example.df[1:9], dummy(example.df$SMOKE, sep = "_"), example.df[11:17])
-names(ex)[10] <- c("smoke")
-
-
-
-# monitor_cal 1 = yes, 0 = no
-ex <- cbind( example.df[1:11], dummy(example.df$monitor_cal, sep = "_"), example.df[13:17])
-names(ex)[12] <- c("monitor_cal")
-
-
-
-
-# Dummmyfying the categorical variables
-
-# vegetables 
-ex <- cbind( example.df[1:6], dummy(example.df$vegetables, sep = "_"), example.df[8:17])
-names(ex)[7:9] <- c("vegetables_never","vegetables_sometimes","vegetable_always")
-
-# main_meals
-obesity_dum <- cbind( example.df[1:9], dummy(example.df$main_meals, sep = "_"), example.df[11:19])
-names(obesity_dum)[10:12] <- c("main_meals_Btw_1_&_2","main_meals_More_than_3","main_meals_three")
-
-# food_in_between
-obesity_dum <- cbind( example.df[1:12], dummy(example.df$food_inbetween, sep = "_"), example.df[14:21])
-names(obesity_dum)[13:16] <- c("food_inbetween_always","food_inbetween_frequently","food_inbetween_no", "food_inbetween_sometimes")
-
-# alcohol
-obesity_dum <- cbind( example.df[1:21], dummy(example.df$alcohol, sep = "_"), example.df[23:24])
-names(obesity_dum)[22:25] <- c("alcohol_always","alcohol_frequently","alcohol_no", "alcohol_sometimes")
-
-# MTRANS
-obesity_dum <- cbind( example.df[1:25], dummy(example.df$MTRANS, sep = "_"), example.df[27])
-names(obesity_dum)[26:30] <- c("mtrans_automobile","mtrans_bike","mtrans_motorbike", "mtrans_public_transportation", "mtrans_walking")
-
-# CH2O
-obesity_dum <- cbind( example.df[1:17], dummy(example.df$CH2O, sep = "_"), example.df[19:31])
-names(obesity_dum)[18:20] <- c("CH2O_less_than_a_liter","CH2O_between_1_and_2","CH2O_more_than_2")
-
-# physical_act
-obesity_dum <- cbind( example.df[1:21], dummy(example.df$physical_act, sep = "_"), example.df[23:33])
-names(obesity_dum)[22:24] <- c("physical_act_do_not_have","physical_act_1_2","physical_act_2_4")
-
-
-# tech_devices : this one is a little bit tricky since there a many categories but only one is represented within the data!
-
-obesity_dum <- cbind( example.df[1:24], dummy(example.df$tech_devices, sep = "_"), example.df[26:35])
-names(obesity_dum)[25] <- c("tech_devices_0_2")
-
-# NObeyesdad
-obesity_dum <- cbind( example.df[1:34], dummy(example.df$NObeyesdad, sep = "_"))
-names(obesity_dum)[35:41] <- c("insufficient_weight", "normal_weight", "obesity_type_1", "obesity_type_2", "obesity_type_3", "overweight_level_1", "overweight_level_2")
+example.df = to_factor(example.df)
 
 
 

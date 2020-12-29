@@ -11,7 +11,7 @@
 \contentsline {subparagraph}{}{3}{section*.9}%
 \contentsline {subparagraph}{}{3}{section*.10}%
 \contentsline {subparagraph}{}{3}{section*.10}%
-\contentsline {subparagraph}{The variable of interest is the fourth one, the ``Weight'', so it will be our dependent variable.}{3}{section*.11}%
+\contentsline {subparagraph}{The variable of interest is the fourth one, the ``Weight'', so it will be our dependent variable.}{4}{section*.11}%
 \contentsline {subparagraph}{We were ``lucky'' on the fact that this dataset has a quite high level of quality, because it has no missing observations, and our subsequent exploratory analysis will tell us if there are outliers to be handled with.}{4}{section*.12}%
 \contentsline {subparagraph}{Once we are done with a Data Exploratory Analysis and with a proper Data Pre-Processing, we will develop several models in order to accurately predict the level of weight of each individual.}{4}{section*.13}%
 \contentsline {subparagraph}{The models will be :}{4}{section*.14}%
@@ -24,7 +24,7 @@
 \contentsline {subparagraph}{The first thing to do is to change the column names so that they are more visually meaningful!}{4}{section*.20}%
 \contentsline {subparagraph}{}{4}{section*.21}%
 \contentsline {subparagraph}{}{4}{section*.21}%
-\contentsline {subparagraph}{}{4}{section*.22}%
+\contentsline {subparagraph}{}{5}{section*.22}%
 \contentsline {subparagraph}{}{5}{section*.22}%
 \contentsline {subparagraph}{}{6}{section*.23}%
 \contentsline {subparagraph}{}{6}{section*.23}%
@@ -44,7 +44,7 @@
 \contentsline {subparagraph}{}{8}{section*.32}%
 \contentsline {subparagraph}{}{8}{section*.33}%
 \contentsline {subparagraph}{}{8}{section*.33}%
-\contentsline {subparagraph}{There were no missing values within our dataset.}{8}{section*.34}%
+\contentsline {subparagraph}{There are no missing values within our dataset! So there is no need to remove any NA.}{8}{section*.34}%
 \contentsline {subparagraph}{}{8}{section*.35}%
 \contentsline {subparagraph}{}{8}{section*.35}%
 \contentsline {section}{Exploratory Data Analysis}{8}{section*.36}%
@@ -70,8 +70,18 @@
 \contentsline {subparagraph}{}{17}{section*.48}%
 \contentsline {subparagraph}{And now we dummify all the categorical and binary variables, in order to make them ``ready'' for the subsequent data analysis!}{17}{section*.49}%
 \contentsline {subparagraph}{}{17}{section*.50}%
-\contentsline {subparagraph}{}{17}{section*.50}%
-\contentsline {section}{Data Analysis}{20}{section*.51}%
-\contentsline {subsection}{Multiple Linear Regression}{20}{section*.52}%
-\contentsline {subparagraph}{}{20}{section*.53}%
-\contentsline {subparagraph}{}{20}{section*.53}%
+\contentsline {subparagraph}{}{19}{section*.50}%
+\contentsline {section}{Data Analysis}{19}{section*.51}%
+\contentsline {subsection}{Multiple Linear Regression}{19}{section*.52}%
+\contentsline {subparagraph}{}{19}{section*.53}%
+\contentsline {subparagraph}{}{19}{section*.53}%
+\contentsline {subparagraph}{}{22}{section*.54}%
+\contentsline {subparagraph}{}{22}{section*.54}%
+\contentsline {subsection}{k-Nearest Neighbors}{23}{section*.55}%
+\contentsline {subparagraph}{Before continuing with the analysis, a data partitioning is necessary.}{23}{section*.56}%
+\contentsline {subparagraph}{Because the dataset is not very large (only 2111 observations), we judge it better to only proceed with partitioning into training and validation sets. However, better results would be obtained if we keep a third ``test set''.}{23}{section*.57}%
+\contentsline {subparagraph}{}{23}{section*.58}%
+\contentsline {subparagraph}{}{23}{section*.58}%
+\contentsline {subparagraph}{But first of all, we should normalize the data, since we have different scales and big values can dominate small values! We normalize only the numerical data.}{23}{section*.59}%
+\contentsline {subparagraph}{}{23}{section*.60}%
+\contentsline {subparagraph}{}{24}{section*.60}%
