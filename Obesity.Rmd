@@ -49,6 +49,8 @@ library(dummies)
 library(nnet)
 library(class)
 library(caret)
+library(rpart)
+library(rpart.plot)
 
 # Working Directory :
 setwd("~/GitHub/CVTDM_Project_MaBAn_2020")
@@ -308,6 +310,17 @@ ggplot(data=obesity, aes(x=NObeyesdad)) +
 
 multi.hist(obesity[,2:4], density = TRUE)
 
+# Creating boxplots :
+
+par(mfrow = c(1, 3))
+
+boxplot(obesity$Weight, ylab = "Weight")
+boxplot(obesity$Height, ylab = "Height")
+boxplot(obesity$Age, ylab = "Age")
+
+
+#We may have ONE outlier for Weight, and almost one for Height!
+#Age is VERY right skewed!
 ```
 
 ##### {-}
@@ -538,10 +551,6 @@ plot(lm_weight)
 
 
 
-
-
-
-
 ## k-Nearest Neighbors
 
 ##### Before continuing with the analysis, a data partitioning is necessary.
@@ -653,6 +662,171 @@ RMSE
 
 
 
+```
+
+#Weird! If we change the set.seed, the results for RMSE change!! So, which set.seed to choose?
+
+
+##### {-}
+
+## Regression Tree
+
+```{r}
+
+set.seed(1)
+
+
+# First run a quite big tree (CP = 0.00001) :
+
+tree_1 <- rpart(
+   Weight ~ .,
+   data = train.set,
+   method = "anova",
+   control = rpart.control(
+      cp = 0.00001,
+      minbucket = 1,
+      maxdepth = 10
+   )
+)
+
+
+# We do a CV : must locate in the table the point from which the CV error starts to rise :
+
+printcp(tree)
+
+# In this case, it starts to rise when CP = 0.00032252
+# BUT, there is a standard error in that point estimate! If we do 0.023867 + 0.0016730 = 0.02554
+
+# So, we can go for a SMALLER tree with 28 splits instead of 32, which corresponds to a CP of 0.00056494
+
+set.seed(1)
+
+tree_2 <- rpart(
+   Weight ~ .,
+   data = train.set,
+   method = "anova",
+   control = rpart.control(
+      cp = 0.00056494,
+      minbucket = 1,
+      maxdepth = 10
+   )
+)
+
+plot_tree = prp(
+   tree_2,
+   type = 1,
+   extra = 1,
+   under = TRUE,
+   split.font = 1,
+   varlen = -10
+)
+
+
+
+
+
+
+
+# Let's compare the RMSE for validation and training sets :
+
+# First, let's create two vectors, one for the predicted values, and another for the actual values :
+
+predicted_train <- predict(tree_2, train.set)
+actual_train <- train.set$Weight
+
+# And lastly, we make use of the RSME formula to calculate it :
+
+RMSE_train = sqrt(mean((predicted_train-actual_train)^2))
+
+RMSE_train
+
+# Same but for the validation set :
+
+predicted_valid <- predict(tree_2, valid.set)
+actual_valid <- valid.set$Weight
+
+
+RMSE_valid = sqrt(mean((predicted_valid-actual_valid)^2))
+
+RMSE_valid
+
+# It is very normal that RMSE is smaller with the training data, because we have selected the optimal CP according to the training data. However, the difference seems not so big. Let's look at some boxplots to compare the performance of the tree on both sets (training and validation) :
+
+par(mfrow = c(1, 2))
+
+boxplot(
+   predicted_train,
+   actual_train,
+   names = c("Predicted", "Actual"),
+   ylab = "Weight",
+   xlab = "Training Set"
+)
+
+boxplot(
+   predicted_valid,
+   actual_valid,
+   names = c("Predicted", "Actual"),
+   ylab = "Weight",
+   xlab = "Validation Set"
+)
+
+
+# Clearly, the validation set seems to have done a better job! Probably the higer RMSE is due to the presence of an outlier in the validation set!
+
+# So we can leave the CP as it is, and the tree will grow until 28 splits.
+
+
+
+# INTERESTING : comparison of both KNN and regression tree on validation set
+
+plot(predicted-predicted_valid)+
+  abline(h = 5)+
+  abline(h = -5)
+
+
+# They seem to behave almost equally at the beginning, but then there is an upward shift, meaning that some considerable differences are ocurring. Let's take a more precise look at each method compared with the validation data :
+
+par(mfrow = c(1, 2))
+
+# For KNN :
+plot(predicted-valid.set[,4], main = "k-Nearest Neighbors", ylab = "Predicted - Actual (= error)") +
+  abline(h = mean(predicted-valid.set[,4]))
+
+
+# For tree :
+plot(predicted_valid-valid.set[, 4], main = "Regression Tree", ylab = "Predicted - Actual (= error)") +
+  abline(h = mean(predicted_valid-valid.set[, 4]))
+
+
+# As suggested by the aforementioned graph, towards the end the k-NN is separating itself from its trend around 0.
+
+# VERY INTERESTING! Actually we can see the trade-off between BIAS and VARIANCE. Certainly, the k-NN seems to be more precise (less variance), since the points are less far apart from each other. BUT, we observe an upward trend! So there is an upward bias towards to end. However, the regression tree has a lot of variance, BUT on average it is very precise (around zero). Indeed :
+
+mean(predicted-valid.set[,4]) 
+
+mean(predicted_valid-valid.set[, 4])
+
+# For the regression tree, the mean is very close to zero.
+
+# But what do we want here? Do we want a very accurate prediction although it may be around on average 4 Kg away from the truth? Or do we want a prediction which is very far from the truth but, taking into account all predictions, on average we are almost exactly on the target?
+
+# Probably we want something like the k-NN, since 4 Kg is not much.
+
+# The regression tree is less biased, more certainly the amount of error is very big (the differences predicted - actual are quite big). 
+
+# Therefore, we may try to do some BOOSTING trees, in order to really focus on the missclassified observations, and after that we will COMPARE AGAIN like we just did with the k-NN. Probably there will be less variance around 0 for the errors.
+
+```
+
+
+
+
+
+
+##### {-}
+
+
+```{r}
 
 # Creating a person for prediction :
 
@@ -684,9 +858,18 @@ example.norm <- predict(norm.values, example.df)
 
 example.df = to_factor(example.df)
 
+#example.df = dummy(example.df)   Create a SINGLE function for dummyfication (need to eliminate the _dummy dataset)
+
+#predict(k_nn, example.df)
+#predict(tree_2, example.df)
+#...
+
+#for Multiple Linear Regression, simply replace coefficients and variable values into the formula to get the predicted weight. Maybe create a function called "MLR()" for this!
+
 
 
 ```
 
-#Weird! If we change the set.seed, the results for RMSE change!! So, which set.seed to choose?
 
+
+##### {-}
