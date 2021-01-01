@@ -51,6 +51,8 @@ library(class)
 library(caret)
 library(rpart)
 library(rpart.plot)
+library(ehaGoF)
+library(forecast)
 
 # Working Directory :
 setwd("~/GitHub/CVTDM_Project_MaBAn_2020")
@@ -482,11 +484,11 @@ obesity_dummy <- subset(obesity_dummy, select = -c(12) )
 
 # vegetables 
 obesity_dum <- cbind( obesity_dummy[1:6], dummy(obesity_dummy$vegetables, sep = "_"), obesity_dummy[8:17])
-names(obesity_dum)[7:9] <- c("vegetables_never","vegetables_sometimes","vegetable_always")
+names(obesity_dum)[7:9] <- c("vegetables_never","vegetables_sometimes","vegetables_always")
 
 # main_meals
 obesity_dum <- cbind( obesity_dum[1:9], dummy(obesity_dum$main_meals, sep = "_"), obesity_dum[11:19])
-names(obesity_dum)[10:12] <- c("main_meals_Btw_1_&_2","main_meals_More_than_3","main_meals_three")
+names(obesity_dum)[10:12] <- c("main_meals_Btw_1_2","main_meals_More_than_3","main_meals_three")
 
 # food_in_between
 obesity_dum <- cbind( obesity_dum[1:12], dummy(obesity_dum$food_inbetween, sep = "_"), obesity_dum[14:21])
@@ -535,12 +537,79 @@ names(obesity_dum)[35:41] <- c("insufficient_weight", "normal_weight", "obesity_
 obesity_lm_dum <- subset(obesity_dum, select = c(1:34))
 
 # Linear regression
+#formula: Weight = Gender, Age, Height, 
+lm_weight <- lm(Weight ~ Gender + Age + Height + family_hist + eat_caloric + vegetables_sometimes +vegetables_always + main_meals_Btw_1_2 + main_meals_More_than_3 + food_inbetween_always + food_inbetween_frequently + food_inbetween_sometimes + smoke + CH2O_between_1_and_2 + CH2O_more_than_2 + monitor_cal + physical_act_1_2 +physical_act_2_4 + tech_devices_0_2 + alcohol_always + alcohol_frequently + alcohol_sometimes + mtrans_automobile + mtrans_bike + mtrans_public_transportation  , data = train.set)
 
-lm_weight <- lm(Weight ~., data = obesity_lm_dum)
 summary(lm_weight)
 plot(lm_weight)
 
+
+
 ```
+
+```{r}
+#Stepwise model selection
+
+#Forward
+lm_forward_obesity <- step(lm_weight, direction = "forward")
+summary(lm_forward_obesity)
+#AIC: 7008.02
+
+#Backward
+lm_backward_obesity <- step(lm_weight, direction = "backward")
+summary(lm_backward_obesity)
+#AIC: 6996.87
+
+#Both
+lm_both_obesity <- step(lm_weight, direction = "both")
+summary(lm_both_obesity)
+#AIC: 6996.87
+
+#Add comments +Assumptions
+```
+
+```{r}
+#Predictions on the validation set
+
+#Forward model:
+forward_pred_obesity <- predict(lm_forward_obesity, valid.set)
+
+#RMSE
+gofRMSE(valid.set$Weight, forward_pred_obesity, dgt = 3) #16.525
+#Mean error
+gofME(valid.set$Weight, forward_pred_obesity, dgt = 3) #0.977
+#MAPE
+gofMAPE(valid.set$Weight, forward_pred_obesity, dgt = 3)#16.485
+
+
+#Backward model:
+backward_pred_obesity <- predict(lm_backward_obesity, valid.set)
+
+#RMSE
+gofRMSE(valid.set$Weight, backward_pred_obesity, dgt = 3) #16.565
+#Mean error
+gofME(valid.set$Weight, backward_pred_obesity, dgt = 3) #0.949
+#MAPE
+gofMAPE(valid.set$Weight, backward_pred_obesity, dgt = 3)#16.533
+
+
+#Both model:
+both_pred_obesity <- predict(lm_both_obesity, valid.set)
+
+#RMSE
+gofRMSE(valid.set$Weight, both_pred_obesity, dgt = 3) #16.565
+#Mean error
+gofME(valid.set$Weight, both_pred_obesity, dgt = 3) #0.949
+#MAPE
+gofMAPE(valid.set$Weight, both_pred_obesity, dgt = 3)#16.533
+
+#Add comments +Assumptions
+
+
+```
+
+
+
 
 ##### {-}
 
