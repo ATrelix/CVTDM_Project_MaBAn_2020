@@ -53,6 +53,7 @@ library(rpart)
 library(rpart.plot)
 library(ehaGoF)
 library(forecast)
+library(randomForest)
 
 # Working Directory :
 setwd("~/GitHub/CVTDM_Project_MaBAn_2020")
@@ -106,7 +107,7 @@ pander(head(obesity))
 ##### The models will be :
 
 1. **Multiple Linear Regression** (not ANOVA since "Age" and "Height" are numerical)
-2. **Classification tree** (complemented with a random forest / boosted trees / bagged trees)
+2. **Regression tree** (complemented with a random forest / boosted trees / bagged trees)
 3. **k-Nearest Neighbors**
 4. **Ensemble Method**
 
@@ -761,7 +762,7 @@ tree_1 <- rpart(
 
 # We do a CV : must locate in the table the point from which the CV error starts to rise :
 
-printcp(tree)
+printcp(tree_1)
 
 # In this case, it starts to rise when CP = 0.00032252
 # BUT, there is a standard error in that point estimate! If we do 0.023867 + 0.0016730 = 0.02554
@@ -888,8 +889,27 @@ mean(predicted_valid-valid.set[, 4])
 ```
 
 
+##### {-}
 
+## Ensemble Method (k-NN + Regression Tree)
 
+##### The aim of this ensemble method is to combine both k-NN and Regression Tree in order to obtain even better results. This combination of methods will be done by taking the average prediction of the variable of interest (`Weight`).
+
+##### This means that the predicted weight using this ensemble method will be obtained by running both combined methods and then taking the average over both results.
+
+```{r}
+
+# Creating dataframe :
+
+my_df <-
+  data.frame(
+    actual = valid.set[, 4],
+    knn = predicted,
+    Regression_tree = predicted_valid,
+    Ensemble_Method = (predicted + predicted_valid) / 2
+  )
+
+```
 
 
 ##### {-}
