@@ -223,7 +223,7 @@ return(x)
   
 }
 
-obesity = binning(obesity)
+obesity_bin = binning(obesity)
 
 
 ```
@@ -262,7 +262,7 @@ return(x)
 
 }
 
-obesity = to_factor(obesity)
+obesity_bin = to_factor(obesity)
 
 ```
 
