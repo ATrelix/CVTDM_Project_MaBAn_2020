@@ -66,7 +66,6 @@ library(rpart)
 library(rpart.plot)
 library(ehaGoF)
 library(forecast)
-library(randomForest)
 
 
 # Working Directory :
@@ -248,7 +247,7 @@ return(x)
 }
 
 
-obesity = binning(obesity)
+obesity_bin = binning(obesity)
 
 
 ```
@@ -284,12 +283,12 @@ return(x)
 
 }
 
-obesity = to_factor(obesity)
+obesity_factor = to_factor(obesity_bin)
 
 ```
 
 
-Our next step will to remove any missing values.
+Our next step will be to remove any missing values.
 
 
 ```{r}
@@ -308,10 +307,14 @@ We will now proceed with the dummification of the categorical variables. All var
 
 
 ```{r}
+
 # Dummyfing the binary variables(family_history, eat_caloric, SMOKE, and monitor_cal) :
 
-# Gender 1 = female, 0 = male
-obesity_dummy <- cbind(dummy(obesity$Gender, sep = "_"), obesity[2:17])
+
+dummify <- function(x) {
+  
+  # Gender 1 = female, 0 = male
+obesity_dummy <- cbind(dummy(x$Gender, sep = "_"), x[2:17])
 names(obesity_dummy)[1] <- c("Gender")
 obesity_dummy <- subset(obesity_dummy, select = -c(2) )
 
@@ -344,42 +347,47 @@ obesity_dummy <- subset(obesity_dummy, select = -c(12) )
 # Dummmyfying the categorical variables
 
 # vegetables 
-obesity_dum <- cbind(obesity_dummy[1:6], dummy(obesity_dummy$vegetables, sep = "_"), obesity_dummy[8:17])
-names(obesity_dum)[7:9] <- c("vegetables_never","vegetables_sometimes","vegetables_always")
+obesity_dummy <- cbind(obesity_dummy[1:6], dummy(obesity_dummy$vegetables, sep = "_"), obesity_dummy[8:17])
+names(obesity_dummy)[7:9] <- c("vegetables_always","vegetables_never","vegetables_sometimes")
 
 # main_meals
-obesity_dum <- cbind(obesity_dum[1:9], dummy(obesity_dum$main_meals, sep = "_"), obesity_dum[11:19])
-names(obesity_dum)[10:12] <- c("main_meals_Btw_1_2","main_meals_More_than_3","main_meals_three")
+obesity_dummy <- cbind(obesity_dummy[1:9], dummy(obesity_dummy$main_meals, sep = "_"), obesity_dummy[11:19])
+names(obesity_dummy)[10:12] <- c("main_meals_Btw_1_2","main_meals_More_than_3","main_meals_three")
 
 # food_in_between
-obesity_dum <- cbind(obesity_dum[1:12], dummy(obesity_dum$food_inbetween, sep = "_"), obesity_dum[14:21])
-names(obesity_dum)[13:16] <- c("food_inbetween_always","food_inbetween_frequently","food_inbetween_no", "food_inbetween_sometimes")
+obesity_dummy <- cbind(obesity_dummy[1:12], dummy(obesity_dummy$food_inbetween, sep = "_"), obesity_dummy[14:21])
+names(obesity_dummy)[13:16] <- c("food_inbetween_always","food_inbetween_frequently","food_inbetween_no", "food_inbetween_sometimes")
 
 # alcohol
-obesity_dum <- cbind(obesity_dum[1:21], dummy(obesity_dum$alcohol, sep = "_"), obesity_dum[23:24])
-names(obesity_dum)[22:25] <- c("alcohol_always","alcohol_frequently","alcohol_no", "alcohol_sometimes")
+obesity_dummy <- cbind(obesity_dummy[1:21], dummy(obesity_dummy$alcohol, sep = "_"), obesity_dummy[23:24])
+names(obesity_dummy)[22:25] <- c("alcohol_always","alcohol_frequently","alcohol_no", "alcohol_sometimes")
 
 # MTRANS
-obesity_dum <- cbind(obesity_dum[1:25], dummy(obesity_dum$MTRANS, sep = "_"), obesity_dum[27])
-names(obesity_dum)[26:30] <- c("mtrans_automobile","mtrans_bike","mtrans_motorbike", "mtrans_public_transportation", "mtrans_walking")
+obesity_dummy <- cbind(obesity_dummy[1:25], dummy(obesity_dummy$MTRANS, sep = "_"), obesity_dummy[27])
+names(obesity_dummy)[26:30] <- c("mtrans_automobile","mtrans_bike","mtrans_motorbike", "mtrans_public_transportation", "mtrans_walking")
 
 # CH2O
-obesity_dum <- cbind(obesity_dum[1:17], dummy(obesity_dum$CH2O, sep = "_"), obesity_dum[19:31])
-names(obesity_dum)[18:20] <- c("CH2O_less_than_a_liter","CH2O_between_1_and_2","CH2O_more_than_2")
+obesity_dummy <- cbind(obesity_dummy[1:17], dummy(obesity_dummy$CH2O, sep = "_"), obesity_dummy[19:31])
+names(obesity_dummy)[18:20] <- c("CH2O_between_1_and_2","CH2O_less_than_a_liter","CH2O_more_than_2")
 
 # physical_act
-obesity_dum <- cbind(obesity_dum[1:21], dummy(obesity_dum$physical_act, sep = "_"), obesity_dum[23:33])
-names(obesity_dum)[22:24] <- c("physical_act_do_not_have","physical_act_1_2","physical_act_2_4")
+obesity_dummy <- cbind(obesity_dummy[1:21], dummy(obesity_dummy$physical_act, sep = "_"), obesity_dummy[23:33])
+names(obesity_dummy)[22:24] <- c("physical_act_1_2","physical_act_2_4", "physical_act_do_not_have")
 
 
 # tech_devices : this one is a little bit tricky since there a many categories but only one is represented within the data!
 
-obesity_dum <- cbind(obesity_dum[1:24], dummy(obesity_dum$tech_devices, sep = "_"), obesity_dum[26:35])
-names(obesity_dum)[25:27] <- c("tech_0_hours", "tech_1_hour", "tech_2_hours_or_more")
+obesity_dummy <- cbind(obesity_dummy[1:24], dummy(obesity_dummy$tech_devices, sep = "_"), obesity_dummy[26:35])
+names(obesity_dummy)[25:27] <- c("tech_1_hour", "tech_2_hours_or_more", "tech_0_hours")
 
 #remove(obesity_dum)
-obesity_dum <- subset(obesity_dum[c(1:36)])
+obesity_dummy <- subset(obesity_dummy[c(1:36)])
 
+return(obesity_dummy)
+  
+}
+
+obesity_dum = dummify(obesity_factor)
 
 
 ```
@@ -1126,10 +1134,21 @@ example.df$SMOKE = "no"
 example.df$CH2O = "Between 1 and 2 L"
 example.df$monitor_cal = "no"
 example.df$physical_act = "2 or 4 days"
-example.df$tech_devices = "0-2_hours"
+example.df$tech_devices = "Two_hours"
 example.df$alcohol = "no"
 example.df$MTRANS = "Walking"
-example.df$NObeyesdad = "Normal_weight"
+example.df$NObeyesdad = "Normal_Weight"
+
+
+
+example.df = to_factor(example.df)
+
+obesity_example = rbind(obesity_factor, example.df)
+
+obesity_example = dummify(obesity_example)   
+
+
+example.df = as.data.frame(obesity_example[2112, ])
 
 
 norm.values <- preProcess(obesity[, c(2:4)], method = "range")
@@ -1137,11 +1156,22 @@ norm.values <- preProcess(obesity[, c(2:4)], method = "range")
 example.norm <- predict(norm.values, example.df)
 
 
-example.df = to_factor(example.df)
 
-#example.df = dummy(example.df)   Create a SINGLE function for dummyfication (need to eliminate the _dummy dataset)
+set.seed(1)
 
-#predict(k_nn, example.df)
+k_nn_example <-
+  knn(
+    train = train.final[, -3],
+    test = example.norm[, -4],
+    cl = train.final[, 3],
+    k = 1
+  )
+
+k_nn_example = as.numeric(as.character(k_nn_example))
+
+predicted_example = denormalize(k_nn_example, valid.set[, 4])
+
+
 #predict(tree_2, example.df)
 #...
 
