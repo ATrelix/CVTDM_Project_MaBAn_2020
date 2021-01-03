@@ -1,87 +1,10 @@
 \contentsline {section}{Introduction}{1}{section*.2}%
-\contentsline {subparagraph}{For this project, our objective is to predict the expected weight level (in Kg) for a given person depending on certain daily habits (eating and physical activity) and on the person's age, gender and height.}{1}{section*.3}%
-\contentsline {subparagraph}{To do this, we found a quite interesting dataset (click here : \url {http://archive.ics.uci.edu/ml/datasets/Estimation+of+obesity+levels+based+on+eating+habits+and+physical+condition+}) containing 2111 observations and 17 variables (mainly categorical).}{1}{section*.4}%
-\contentsline {subparagraph}{Please, find here a manually created metadata table :}{1}{section*.5}%
-\contentsline {subparagraph}{}{1}{section*.6}%
-\contentsline {subparagraph}{}{2}{section*.6}%
-\contentsline {subparagraph}{}{3}{section*.7}%
-\contentsline {subparagraph}{}{3}{section*.7}%
-\contentsline {subparagraph}{Here is a small overview of the first observations :}{3}{section*.8}%
-\contentsline {subparagraph}{}{3}{section*.9}%
-\contentsline {subparagraph}{}{3}{section*.9}%
-\contentsline {subparagraph}{}{3}{section*.10}%
-\contentsline {subparagraph}{}{3}{section*.10}%
-\contentsline {subparagraph}{The variable of interest is the fourth one, the ``Weight'', so it will be our dependent variable.}{4}{section*.11}%
-\contentsline {subparagraph}{We were ``lucky'' on the fact that this dataset has a quite high level of quality, because it has no missing observations, and our subsequent exploratory analysis will tell us if there are outliers to be handled with.}{4}{section*.12}%
-\contentsline {subparagraph}{Once we are done with a Data Exploratory Analysis and with a proper Data Pre-Processing, we will develop several models in order to accurately predict the level of weight of each individual.}{4}{section*.13}%
-\contentsline {subparagraph}{The models will be :}{4}{section*.14}%
-\contentsline {subparagraph}{We will deploy the best model based on error metrics and prediction performance.}{4}{section*.15}%
-\contentsline {subparagraph}{At the very end, we will make a \textbf {Shiny App} available, in which any user can fill-in a questionnaire concerning daily habits, age and height. Then, the App will tell the user what is the expected weight according to those characteristics, and will present the result in two forms :}{4}{section*.16}%
-\contentsline {subparagraph}{The user will also be able to \textbf {select the type of model} that will predict the results. That way, it will be interesting to see with just a few clicks how each model will yield different results.}{4}{section*.17}%
-\contentsline {subparagraph}{}{4}{section*.18}%
-\contentsline {subparagraph}{}{4}{section*.18}%
-\contentsline {section}{Data Pre-Processing}{4}{section*.19}%
-\contentsline {subparagraph}{The first thing to do is to change the column names so that they are more visually meaningful!}{4}{section*.20}%
-\contentsline {subparagraph}{}{4}{section*.21}%
-\contentsline {subparagraph}{}{4}{section*.21}%
-\contentsline {subparagraph}{}{5}{section*.22}%
-\contentsline {subparagraph}{}{5}{section*.22}%
-\contentsline {subparagraph}{}{6}{section*.23}%
-\contentsline {subparagraph}{}{6}{section*.23}%
-\contentsline {subparagraph}{Now, since many variables are in fact numerical and continuous between a range (for example \texttt {vegetables}, inside the range 1 to 3), we will transform them into categorical. This is, somehow, BINNING. For this, we will follow the names given in the information file refered to earlier (\url {https://www.sciencedirect.com/science/article/pii/S2352340919306985}).}{6}{section*.24}%
-\contentsline {subparagraph}{}{6}{section*.25}%
-\contentsline {subparagraph}{}{7}{section*.25}%
-\contentsline {subparagraph}{}{7}{section*.26}%
-\contentsline {subparagraph}{}{7}{section*.26}%
-\contentsline {subparagraph}{As we saw with the \texttt {str()} function, all the categorical variables are treated as \texttt {character}.}{7}{section*.27}%
-\contentsline {subparagraph}{Therefore, we will now convert all the categorical variables to \texttt {factor} type.}{7}{section*.28}%
-\contentsline {subparagraph}{}{7}{section*.29}%
-\contentsline {subparagraph}{}{8}{section*.29}%
-\contentsline {subparagraph}{}{8}{section*.30}%
-\contentsline {subparagraph}{}{8}{section*.30}%
-\contentsline {subparagraph}{Let's now remove any missing values.}{8}{section*.31}%
-\contentsline {subparagraph}{}{8}{section*.32}%
-\contentsline {subparagraph}{}{8}{section*.32}%
-\contentsline {subparagraph}{}{8}{section*.33}%
-\contentsline {subparagraph}{}{8}{section*.33}%
-\contentsline {subparagraph}{There are no missing values within our dataset! So there is no need to remove any NA.}{8}{section*.34}%
-\contentsline {subparagraph}{}{8}{section*.35}%
-\contentsline {subparagraph}{}{8}{section*.35}%
-\contentsline {section}{Exploratory Data Analysis}{8}{section*.36}%
-\contentsline {subparagraph}{}{8}{section*.37}%
-\contentsline {subparagraph}{}{9}{section*.37}%
-\contentsline {subparagraph}{}{9}{section*.38}%
-\contentsline {subparagraph}{}{9}{section*.38}%
-\contentsline {subparagraph}{We see that the distribution of observations across the different weights is quite uniform, meaning that we do not have an unbalanced data set with respect to our variable of interest (the weight).}{9}{section*.39}%
-\contentsline {subparagraph}{Let's now look at some histograms for all the continuous variables in our dataset.}{9}{section*.40}%
-\contentsline {subparagraph}{}{9}{section*.41}%
-\contentsline {subparagraph}{}{10}{section*.41}%
-\contentsline {subparagraph}{}{10}{section*.42}%
-\contentsline {subparagraph}{}{10}{section*.42}%
-\contentsline {subparagraph}{Now, let's do some barplots in order to get an idea of the distribution of each of the categorical variables.}{10}{section*.43}%
-\contentsline {subparagraph}{}{10}{section*.44}%
-\contentsline {subparagraph}{}{12}{section*.44}%
-\contentsline {subparagraph}{}{16}{section*.45}%
-\contentsline {subparagraph}{}{16}{section*.45}%
-\contentsline {subparagraph}{Let's look at the correlations between the variables.}{16}{section*.46}%
-\contentsline {subparagraph}{}{16}{section*.47}%
-\contentsline {subparagraph}{}{17}{section*.47}%
-\contentsline {subparagraph}{}{17}{section*.48}%
-\contentsline {subparagraph}{}{17}{section*.48}%
-\contentsline {subparagraph}{And now we dummify all the categorical and binary variables, in order to make them ``ready'' for the subsequent data analysis!}{17}{section*.49}%
-\contentsline {subparagraph}{}{17}{section*.50}%
-\contentsline {subparagraph}{}{19}{section*.50}%
-\contentsline {section}{Data Analysis}{19}{section*.51}%
-\contentsline {subsection}{Multiple Linear Regression}{19}{section*.52}%
-\contentsline {subparagraph}{}{19}{section*.53}%
-\contentsline {subparagraph}{}{19}{section*.53}%
-\contentsline {subparagraph}{}{22}{section*.54}%
-\contentsline {subparagraph}{}{22}{section*.54}%
-\contentsline {subsection}{k-Nearest Neighbors}{23}{section*.55}%
-\contentsline {subparagraph}{Before continuing with the analysis, a data partitioning is necessary.}{23}{section*.56}%
-\contentsline {subparagraph}{Because the dataset is not very large (only 2111 observations), we judge it better to only proceed with partitioning into training and validation sets. However, better results would be obtained if we keep a third ``test set''.}{23}{section*.57}%
-\contentsline {subparagraph}{}{23}{section*.58}%
-\contentsline {subparagraph}{}{23}{section*.58}%
-\contentsline {subparagraph}{But first of all, we should normalize the data, since we have different scales and big values can dominate small values! We normalize only the numerical data.}{23}{section*.59}%
-\contentsline {subparagraph}{}{23}{section*.60}%
-\contentsline {subparagraph}{}{24}{section*.60}%
+\contentsline {section}{Data Pre-Processing}{5}{section*.3}%
+\contentsline {section}{Exploratory Data Analysis}{13}{section*.4}%
+\contentsline {subparagraph}{Let's look at the correlations between the variables.}{23}{section*.5}%
+\contentsline {section}{Data Analysis}{23}{section*.6}%
+\contentsline {subsection}{Multiple Linear Regression}{23}{section*.7}%
+\contentsline {subsection}{k-Nearest Neighbors}{46}{section*.8}%
+\contentsline {subsection}{Regression Tree}{50}{section*.9}%
+\contentsline {subsection}{Ensemble Method (MLR + k-NN + Regression Tree)}{64}{section*.10}%
+\contentsline {subsection}{Creating a person for prediction}{64}{section*.11}%
