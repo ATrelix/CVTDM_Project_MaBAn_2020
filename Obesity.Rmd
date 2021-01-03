@@ -25,6 +25,15 @@ To do this, we found a quite interesting dataset (click here : http://archive.ic
 Please, find here a manually created metadata table :  
 
 
+```{r, include=FALSE}
+
+knitr::opts_chunk$set(
+  
+  warning = FALSE, message = FALSE
+  
+)
+
+```
 
 ```{r}
 
@@ -249,7 +258,7 @@ As we saw with the "str()" function, all the categorical variables are treated a
 Just as we did with the binning, we created a function to convert character variables to factor. This function is called "to_factor".
 
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 
 # Converting character variables to factor :
 
@@ -925,6 +934,8 @@ The RMSE for the validation data is 13.25937.
 
 It is very normal that RMSE is smaller with the training data, because we have selected the optimal CP according to the training data. However, the difference seems not so big. 
 
+nyway, the RMSE which is of interest is the one for the validation set, since the validation data is "fresh and new", has not been used to adjust the model.
+
 &nbsp;
 
 Let's now look at some boxplots to compare the performance of the tree on both sets (training and validation).
@@ -1068,6 +1079,29 @@ ensemble_df <-
 head(ensemble_df)
 
 ```
+
+
+```{r}
+
+RMSE_ensemble = sqrt(mean((ensemble_df[, 5] - valid.set[, 4])^2))
+
+RMSE_ensemble
+
+
+RMSE_total.df = data.frame(
+  
+    RMSE_MLR = 16.416,
+    RMSE_kNN = 15.02754,
+    RMSE_Tree = 13.25937,
+    RMSE_Ensemble = 11.39791
+   
+  )
+
+pander(RMSE_total.df)
+
+```
+
+
 
 
 ## Creating a person for prediction

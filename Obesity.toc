@@ -1,10 +1,10 @@
 \contentsline {section}{Introduction}{1}{section*.2}%
 \contentsline {section}{Data Pre-Processing}{5}{section*.3}%
-\contentsline {section}{Exploratory Data Analysis}{13}{section*.4}%
-\contentsline {subparagraph}{Let's look at the correlations between the variables.}{23}{section*.5}%
-\contentsline {section}{Data Analysis}{23}{section*.6}%
-\contentsline {subsection}{Multiple Linear Regression}{23}{section*.7}%
-\contentsline {subsection}{k-Nearest Neighbors}{46}{section*.8}%
-\contentsline {subsection}{Regression Tree}{50}{section*.9}%
-\contentsline {subsection}{Ensemble Method (MLR + k-NN + Regression Tree)}{64}{section*.10}%
-\contentsline {subsection}{Creating a person for prediction}{64}{section*.11}%
+\contentsline {section}{Exploratory Data Analysis}{11}{section*.4}%
+\contentsline {subparagraph}{Let's look at the correlations between the variables.}{22}{section*.5}%
+\contentsline {section}{Data Analysis}{22}{section*.6}%
+\contentsline {subsection}{Multiple Linear Regression}{22}{section*.7}%
+\contentsline {subsection}{k-Nearest Neighbors}{45}{section*.8}%
+\contentsline {subsection}{Regression Tree}{49}{section*.9}%
+\contentsline {subsection}{Ensemble Method (MLR + k-NN + Regression Tree)}{61}{section*.10}%
+\contentsline {subsection}{Creating a person for prediction}{62}{section*.11}%
