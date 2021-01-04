@@ -233,6 +233,8 @@ valid.set <- obesity_dum[valid.obs, ]
 
 lm_weight <- lm(Weight ~ Gender + Age + Height + family_hist + eat_caloric + vegetables_sometimes +vegetables_always + main_meals_Btw_1_2 + main_meals_More_than_3 + food_inbetween_always + food_inbetween_frequently + food_inbetween_sometimes + smoke + CH2O_between_1_and_2 + CH2O_more_than_2 + monitor_cal + physical_act_1_2 +physical_act_2_4 + tech_1_hour+ tech_2_hours_or_more + alcohol_always + alcohol_frequently + alcohol_sometimes + mtrans_automobile + mtrans_bike + mtrans_public_transportation  , data = train.set)
 
+lm_backward_obesity <- step(lm_weight, direction = "backward")
+
 backward_pred_obesity <- predict(lm_backward_obesity, valid.set)
 
 
@@ -381,6 +383,14 @@ ui <- fluidPage(theme = shinytheme("flatly"),
 )
 
 server <- function(input, output) {
+    
+    output$weight_pred <- renderText({
+        
+       
+        paste(" ")
+        
+        
+    })
     
     observeEvent(input$save, {
         
