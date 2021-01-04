@@ -397,6 +397,7 @@ Finally, the last step in the data pre-processing is the partitionning of the da
 
 
 ```{r}
+
 # Partitioning the data (60% training, 40% validation)
 
 set.seed(1)
@@ -1169,15 +1170,16 @@ k_nn_example <-
 
 k_nn_example = as.numeric(as.character(k_nn_example))
 
-predicted_example = denormalize(k_nn_example, valid.set[, 4])
+predicted_example_knn = denormalize(k_nn_example, valid.set[, 4])
 
 
-#predict(tree_2, example.df)
-#...
-
-#for Multiple Linear Regression, simply replace coefficients and variable values into the formula to get the predicted weight. Maybe create a function called "MLR()" for this!
+predicted_example_tree = predict(tree_2, example.df)
 
 
+predicted_example_mlr = predict(lm_backward_obesity, example.df)
+
+
+ensemble_prediction = (predicted_example_knn + predicted_example_tree + predicted_example_mlr)/3
 
 ```
 
