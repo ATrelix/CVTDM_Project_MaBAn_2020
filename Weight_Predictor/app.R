@@ -5,7 +5,6 @@ library(pander)
 library(dplyr)
 library(gt)
 library(car)
-library(ggplot2)
 library(gridExtra)
 library(psych)
 library(corrplot)
@@ -334,43 +333,110 @@ predicted_valid <- predict(tree_2, valid.set)
 
 Q1 <- c("Male", "Female")
 
+Q5 <- c("Yes", "No")
+Q6 <- c("Yes", "No")
+Q7 <- c("Never", "Sometimes", "Always")
+Q8 <- c("Between 1 and 2", "Three", "More than three")
+Q9 <- c("No", "Sometimes", "Frequently", "Always")
 Q10 <- c("Yes", "No")
+Q11 <- c("Less than a liter", "Between 1 and 2 liters", "More than 2 liters")
+Q12 <- c("Yes", "No")
+Q13 <- c("I do not have", "Between 1 and 2 hours", "Between 2 and 4 hours")
+Q14 <- c("0 hours", "1 hour", "2 hours or more")
+Q15 <- c("I do not drink", "Sometimes", "Frequently", "Every day")
+Q16 <- c("Automobile", "Motorbike", "Bike", "Public Transportation", "Walking")
+
 
 ui <- fluidPage(theme = shinytheme("flatly"),
                 
                 
                 
-                titlePanel("Weight Prediction"),
+                titlePanel(h1("Weight Predictor", align = "center")),
+              
+                div(img(src="picture.jpg", height="20%", width="20%"), style="text-align: center;"),
                 
                 tabsetPanel(type="tab",
                             tabPanel("Predictor",
                                      
                 mainPanel(
                     
+                    br(),
+                    paste("Welcome to the Weight Predictor! "),
+                    br(),
+                    br(),
+                    
+                    paste("Please, answer a few questions to obtain some data about you."),
+                    br(),
+                    br(),
+                    br(),
                     
                     radioButtons("Q1", "Q1 - You are a ... ", Q1, selected = character(0)),
-                    numericInput("Q2", "Q2 - How old are you ?", 0, min = 1, max = 100),
-                    radioButtons("Q10", "Q10 - Do you smoke ?", Q10, selected = character(0)),
+                    br(),
+                    numericInput("Q2", "Q2 - How old are you?", "", min = 1, max = 100),
+                    br(),
+                    numericInput("Q3", "Q3 - How tall are you (in meters)? (e.g. 1.56)", "", min = 1, max = 100),
+                    br(),
+                    numericInput("Q4", "Q4 - How much (in Kg) do you weight currently?", "", min = 1, max = 300),
+                    br(),
+                    radioButtons("Q5", "Q5 - Has a family member suffered or suffers from overweight?", Q5, selected = character(0)),
+                    br(),
+                    radioButtons("Q6", "Q6 - Do you eat high caloric food frequently?", Q6, selected = character(0)),
+                    br(),
+                    radioButtons("Q7", "Q7 - Do you usually eat vegetables in your meals?", Q7, selected = character(0)),
+                    br(),
+                    radioButtons("Q8", "Q8 - How many main meals do you have daily?", Q8, selected = character(0)),
+                    br(),
+                    radioButtons("Q9", "Q9 - Do you eat any food between meals?", Q9, selected = character(0)),
+                    br(),
+                    radioButtons("Q10", "Q10 - Do you smoke?", Q10, selected = character(0)),
+                    br(),
+                    radioButtons("Q11", "Q11 - How much water do you drink daily?", Q11, selected = character(0)),
+                    br(),
+                    radioButtons("Q12", "Q12 - Do you monitor the calories you eat daily?", Q12, selected = character(0)),
+                    br(),
+                    radioButtons("Q13", "Q13 - How often do you have physical activity?", Q13, selected = character(0)),
+                    br(),
+                    radioButtons("Q14", "Q14 - How much time do you daily use technological devices such as cell phone, videogames, 
+                                 television, computer and others?", Q14, selected = character(0)),
+                    br(),
+                    radioButtons("Q15", "Q15 - How often do you drink alcohol?", Q15, selected = character(0)),
+                    br(),
+                    radioButtons("Q16", "Q16 - Which transportation do you usually use?", Q16, selected = character(0)),
+                    
+                    br(),
+                    br(),
+                    
+                    paste("Thank you! Now, click on 'Save your answers'."),
+                    br(),
+                    br(),
                     
                     actionButton(inputId = "save", label = "Save your answers", class="btn btn-secondary", icon = icon("key"), width = NULL),
                     
-                    dataTableOutput("df")
+                    br(),
+                    br(),
+                    br(),
+                    br(),
+                    
+                    
                 ),
                 
               
                 
                 sidebarPanel(
-                    selectInput("models", label = "Choose a model : ", choices = list("Multiple Linear Regression", "k-NN", "Regression Tree", "Ensemble")),
+                    style = "position:fixed;width:inherit;",
+                    selectInput("models", label = "When you are done with the questions, please choose a model from the dropdown list below : ", choices = list("Multiple Linear Regression", "k-NN", "Regression Tree", "Ensemble")),
                     br(),
-                             br(),
-                             paste("Your weight will be"),
+                    br(),
+                    paste("Now, click here :"),
+                    br(),
+                    actionButton(inputId = "calculate_weight", label = "Know your weight !", class="btn btn-secondary", icon = icon("child"), width = NULL),
+                    br(),
+                    br(),
+                             paste("Your weight (in Kg) will be"),
                              verbatimTextOutput("weight_pred"),
                              paste("if you continue with your daily habits."),
                              br(),
-                             br(),
-                             actionButton(inputId = "calculate_weight", label = "Know your weight !", class="btn btn-secondary", icon = icon("child"), width = NULL),
-                             br(),
-                             br(),
+                             
                 )
                             ),
                 
@@ -400,16 +466,62 @@ server <- function(input, output) {
         app.final.df[, 2] = input$Q2
         app.final.norm[, 2] = (input$Q2 - min(train.set[, 2]))/(max(train.set[, 2]) - min(train.set[, 2]))
         
+        app.final.df[, 3] = input$Q3
+        app.final.norm[, 3] = (input$Q3 - min(train.set[, 3]))/(max(train.set[, 3]) - min(train.set[, 3]))
+        
+        app.final.df[, 4] = input$Q4
+        app.final.norm[, 4] = (input$Q4 - min(train.set[, 4]))/(max(train.set[, 4]) - min(train.set[, 4]))
+        
+        if(input$Q5 == "Yes"){app.final.df[, 5] = 1}
+        if(input$Q5 == "No"){app.final.df[, 5] = 0}
+        
+        if(input$Q6 == "Yes"){app.final.df[, 6] = 1}
+        if(input$Q6 == "No"){app.final.df[, 6] = 0}
+        
+        if(input$Q7 == "Always"){app.final.df[, 7] = 1 ; app.final.df[, 8] = 0 ; app.final.df[, 9] = 0}
+        if(input$Q7 == "Never"){app.final.df[, 7] = 0 ; app.final.df[, 8] = 1 ; app.final.df[, 9] = 0}
+        if(input$Q7 == "Sometimes"){app.final.df[, 7] = 0 ; app.final.df[, 8] = 0 ; app.final.df[, 9] = 1}
+        
+        if(input$Q8 == "Between 1 and 2"){app.final.df[, 10] = 1 ; app.final.df[, 11] = 0 ; app.final.df[, 12] = 0}
+        if(input$Q8 == "Three"){app.final.df[, 10] = 0 ; app.final.df[, 11] = 0 ; app.final.df[, 12] = 1}
+        if(input$Q8 == "More than three"){app.final.df[, 10] = 0 ; app.final.df[, 11] = 1 ; app.final.df[, 12] = 0}
+        
+        if(input$Q9 == "Always"){app.final.df[, 13] = 1 ; app.final.df[, 14] = 0 ; app.final.df[, 15] = 0 ; app.final.df[, 16] = 0}
+        if(input$Q9 == "Frequently"){app.final.df[, 13] = 0 ; app.final.df[, 14] = 1 ; app.final.df[, 15] = 0 ; app.final.df[, 16] = 0}
+        if(input$Q9 == "Sometimes"){app.final.df[, 13] = 0 ; app.final.df[, 14] = 0 ; app.final.df[, 15] = 0 ; app.final.df[, 16] = 1}
+        if(input$Q9 == "No"){app.final.df[, 13] = 0 ; app.final.df[, 14] = 0 ; app.final.df[, 15] = 1 ; app.final.df[, 16] = 0}
+        
         if(input$Q10 == "Yes"){app.final.df[, 17] = 1}
         if(input$Q10 == "No"){app.final.df[, 17] = 0}
         
+        if(input$Q11 == "Between 1 and 2 liters"){app.final.df[, 18] = 1 ; app.final.df[, 19] = 0 ; app.final.df[, 20] = 0}
+        if(input$Q11 == "Less than a liter"){app.final.df[, 18] = 0 ; app.final.df[, 19] = 1 ; app.final.df[, 20] = 0}
+        if(input$Q11 == "More than 2 liters"){app.final.df[, 18] = 0 ; app.final.df[, 19] = 0 ; app.final.df[, 20] = 1}
+        
+        if(input$Q12 == "Yes"){app.final.df[, 21] = 1}
+        if(input$Q12 == "No"){app.final.df[, 21] = 0}
+        
+        if(input$Q13 == "I do not have"){app.final.df[, 22] = 0 ; app.final.df[, 23] = 0 ; app.final.df[, 24] = 1}
+        if(input$Q13 == "Between 1 and 2 hours"){app.final.df[, 22] = 1 ; app.final.df[, 23] = 0 ; app.final.df[, 24] = 0}
+        if(input$Q13 == "Between 2 and 4 hours"){app.final.df[, 22] = 0 ; app.final.df[, 23] = 1 ; app.final.df[, 24] = 0}
+        
+        if(input$Q14 == "0 hours"){app.final.df[, 25] = 0 ; app.final.df[, 26] = 0 ; app.final.df[, 27] = 1}
+        if(input$Q14 == "1 hour"){app.final.df[, 25] = 1 ; app.final.df[, 26] = 0 ; app.final.df[, 27] = 0}
+        if(input$Q14 == "2 hours or more"){app.final.df[, 25] = 0 ; app.final.df[, 26] = 1 ; app.final.df[, 27] = 0}
+        
+        if(input$Q15 == "Every day"){app.final.df[, 28] = 1 ; app.final.df[, 29] = 0 ; app.final.df[, 30] = 0 ; app.final.df[, 31] = 0}
+        if(input$Q15 == "Frequently"){app.final.df[, 28] = 0 ; app.final.df[, 29] = 1 ; app.final.df[, 30] = 0 ; app.final.df[, 31] = 0}
+        if(input$Q15 == "Sometimes"){app.final.df[, 28] = 0 ; app.final.df[, 29] = 0 ; app.final.df[, 30] = 0 ; app.final.df[, 31] = 1}
+        if(input$Q15 == "I do not drink"){app.final.df[, 28] = 0 ; app.final.df[, 29] = 0 ; app.final.df[, 30] = 1 ; app.final.df[, 31] = 0}
+        
+        if(input$Q16 == "Automobile"){app.final.df[, 32] = 1 ; app.final.df[, 33] = 0 ; app.final.df[, 34] = 0 ; app.final.df[, 35] = 0 ; app.final.df[, 36] = 0}
+        if(input$Q16 == "Bike"){app.final.df[, 32] = 0 ; app.final.df[, 33] = 1 ; app.final.df[, 34] = 0 ; app.final.df[, 35] = 0 ; app.final.df[, 36] = 0}
+        if(input$Q16 == "Motorbike"){app.final.df[, 32] = 0 ; app.final.df[, 33] = 0 ; app.final.df[, 34] = 1 ; app.final.df[, 35] = 0 ; app.final.df[, 36] = 0}
+        if(input$Q16 == "Public Transportation"){app.final.df[, 32] = 0 ; app.final.df[, 33] = 0 ; app.final.df[, 34] = 0 ; app.final.df[, 35] = 1 ; app.final.df[, 36] = 0}
+        if(input$Q16 == "Walking"){app.final.df[, 32] = 0 ; app.final.df[, 33] = 0 ; app.final.df[, 34] = 0 ; app.final.df[, 35] = 0 ; app.final.df[, 36] = 1}
         
         
         
-        
-        output$df <- renderDataTable(app.final.df)
-    
-    
         observeEvent(input$calculate_weight, {
             
             if(input$models == "Multiple Linear Regression"){
@@ -418,7 +530,7 @@ server <- function(input, output) {
                 
                 output$weight_pred <- renderText({
                     
-                    paste(mlr)
+                    paste(round(mlr, 2))
                     
                 })
                 
@@ -435,7 +547,7 @@ server <- function(input, output) {
                 
                     output$weight_pred <- renderText({
                         
-                        paste(knn.app)
+                        paste(round(knn.app, 2))
                         
                         
                     })
@@ -445,6 +557,47 @@ server <- function(input, output) {
                 }
             
            
+            if(input$models == "Regression Tree"){
+                
+                
+                tree.app = predict(tree_2, app.final.df)
+                
+                
+                
+                output$weight_pred <- renderText({
+                    
+                    paste(round(tree.app, 2))
+                    
+                    
+                })
+                
+                
+                
+            }
+            
+            if(input$models == "Ensemble"){
+                
+                
+                tree.app = predict(tree_2, app.final.df)
+                
+                knn.app = predict(k_nn, app.final.df)
+                
+                mlr = predict(lm_backward_obesity, app.final.df) 
+                
+                ensemble = (mlr + knn.app + tree.app) / 3
+                
+                
+                output$weight_pred <- renderText({
+                    
+                    paste(round(ensemble, 2))
+                    
+                    
+                })
+                
+                
+                
+            }
+            
         }
         
         )
