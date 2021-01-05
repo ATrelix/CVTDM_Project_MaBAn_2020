@@ -14,6 +14,19 @@ fontsize: 12pt
   
 ---
 
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+
 # Introduction
 
 For this project, our objective is to predict the expected weight level (in Kg) for a given person depending on certain daily habits (eating and physical activity) and on the person's age, gender and height. 
@@ -113,7 +126,7 @@ pander(head(obesity))
 
 The variable of interest is  "Weight", it will be our dependent variable.
 
-This data set seems to be of  high  quality, because it has no missing observations, and our subsequent exploratory analysis will tell us if there are outliers to be handled with.
+This data set seems to be of high quality, because it has no missing observations, and our subsequent exploratory analysis will tell us if there are outliers to be handled with.
 
 
 &nbsp;
@@ -137,13 +150,9 @@ We will deploy the best model based on error metrics and prediction performance.
 &nbsp;
 &nbsp;
 
-At the very end, we will make a **Shiny App** available, in which any user can fill-in a questionnaire concerning daily habits, age and height. Then, the App will tell the user what is the expected weight according to those characteristics, and will present the result in two forms :
+Finally, there is a **Shiny App** available (here : ...), in which any user can fill-in a questionnaire concerning daily habits, age, gender and height. Then, the App will tell the user what is the expected weight (in Kg) according to those characteristics. Quite handy indeed, if you do not have a weighing machine nearby!
 
-* The expected weight in Kg.
-
-* The expected obesity level based on the Body Mass Index, following the classification comming from the World Health Organisation.
-
-The user will also be able to **select the type of model** that will predict the results. That way, it will be interesting to see with just a few clicks how each model will yield different results.
+The user will also be able to **select the type of model** that will predict the results. That way, it will be interesting to see, with just a few clicks, how each model will yield different results.
 
 
 &nbsp;
@@ -184,9 +193,9 @@ pander(summary(obesity[, 2:4]))
 ```
 
 
-Since many variables are numerical and continuous between a range (for example `vegetables`, inside the range 1 to 3), we will transform them into categorical. This is, somehow, BINNING. For this, we will follow the names given in the information file refered to earlier (https://www.sciencedirect.com/science/article/pii/S2352340919306985).
+Since many variables are numerical and continuous between a range (for example `vegetables`, inside the range 1 to 3), we will transform them into categorical. This is, somehow, BINNING. For this, we will follow the names given in the information file referred to earlier (https://www.sciencedirect.com/science/article/pii/S2352340919306985).
 
-To make this task easier, we created a function that bins variables. This function is called "binning"
+To make this task easier, we created a function that bins variables. This function is called "binning".
 
 ```{r}
 
@@ -252,7 +261,7 @@ obesity_bin = binning(obesity)
 
 ```
 
-As we saw with the "str()" function, all the categorical variables are treated as "character".Therefore, we will  convert all the categorical variables to "factor" type.
+As we saw with the `str()` function, all the categorical variables are treated as "character". Therefore, we will  convert all the categorical variables to "factor" type.
 
 Just as we did with the binning, we created a function to convert character variables to factor. This function is called "to_factor".
 
@@ -449,18 +458,14 @@ boxplot(obesity$Weight, ylab = "Weight")
 boxplot(obesity$Height, ylab = "Height")
 boxplot(obesity$Age, ylab = "Age")
 
-
-#We may have ONE outlier for Weight, and almost one for Height!
-#Age is VERY right skewed!
-
-#comment on why we are not removing the outliers
 ```
 
 
 Interpretation:
 
-...
+We may have ONE outlier for Weight, and almost one for Height! However, they are not so extreme and we judge it not necessary to delete them (they may be informative enough!).
 
+From the boxplot we see that the variable 'Age' is VERY right skewed!
 
 &nbsp;
 
@@ -470,72 +475,72 @@ Now, let's do some barplots in order to get an idea of the distribution of each 
 
 # Barplots :
 
-plot_1 = ggplot(data=obesity, aes(x=NObeyesdad)) + 
+plot_1 = ggplot(data=obesity_bin, aes(x=NObeyesdad)) + 
   geom_bar(aes(y = ..count.., group = 1)) +
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
   geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
 
-plot_2 = ggplot(data=obesity, aes(x=main_meals)) + 
+plot_2 = ggplot(data=obesity_bin, aes(x=main_meals)) + 
   geom_bar(aes(y = ..count.., group = 1)) +
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
   geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
 
-plot_3 = ggplot(data=obesity, aes(x=Gender)) + 
+plot_3 = ggplot(data=obesity_bin, aes(x=Gender)) + 
   geom_bar(aes(y = ..count.., group = 1)) +
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
   geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
 
-plot_4 = ggplot(data=obesity, aes(x=family_history)) + 
+plot_4 = ggplot(data=obesity_bin, aes(x=family_history)) + 
   geom_bar(aes(y = ..count.., group = 1)) +
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
   geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
 
-plot_5 = ggplot(data=obesity, aes(x=vegetables)) + 
+plot_5 = ggplot(data=obesity_bin, aes(x=vegetables)) + 
   geom_bar(aes(y = ..count.., group = 1)) +
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
   geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
 
-plot_6 = ggplot(data=obesity, aes(x=food_inbetween)) + 
+plot_6 = ggplot(data=obesity_bin, aes(x=food_inbetween)) + 
   geom_bar(aes(y = ..count.., group = 1)) +
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
   geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
 
-plot_7 = ggplot(data=obesity, aes(x=tech_devices)) + 
+plot_7 = ggplot(data=obesity_bin, aes(x=tech_devices)) + 
   geom_bar(aes(y = ..count.., group = 1)) +
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
   geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
 
-plot_8 = ggplot(data=obesity, aes(x=eat_caloric)) + 
+plot_8 = ggplot(data=obesity_bin, aes(x=eat_caloric)) + 
   geom_bar(aes(y = ..count.., group = 1)) +
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
   geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
 
-plot_9 = ggplot(data=obesity, aes(x=SMOKE)) + 
+plot_9 = ggplot(data=obesity_bin, aes(x=SMOKE)) + 
   geom_bar(aes(y = ..count.., group = 1)) +
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
   geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
 
-plot_10 = ggplot(data=obesity, aes(x=CH2O)) + 
+plot_10 = ggplot(data=obesity_bin, aes(x=CH2O)) + 
   geom_bar(aes(y = ..count.., group = 1)) +
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
   geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
 
-plot_11 = ggplot(data=obesity, aes(x=monitor_cal)) + 
+plot_11 = ggplot(data=obesity_bin, aes(x=monitor_cal)) + 
   geom_bar(aes(y = ..count.., group = 1)) +
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
   geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
 
-plot_12 = ggplot(data=obesity, aes(x=physical_act)) + 
+plot_12 = ggplot(data=obesity_bin, aes(x=physical_act)) + 
   geom_bar(aes(y = ..count.., group = 1)) +
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
   geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
 
-plot_13 = ggplot(data=obesity, aes(x=alcohol)) + 
+plot_13 = ggplot(data=obesity_bin, aes(x=alcohol)) + 
   geom_bar(aes(y = ..count.., group = 1)) +
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
   geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
 
-plot_14 = ggplot(data=obesity, aes(x=MTRANS)) + 
+plot_14 = ggplot(data=obesity_bin, aes(x=MTRANS)) + 
   geom_bar(aes(y = ..count.., group = 1)) +
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
   geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
@@ -553,7 +558,19 @@ grid.arrange(plot_13, plot_14, ncol=2)
 
 ```
 
-##### Let's look at the correlations between the variables.
+&nbsp;
+
+From the barplots above, we see that there are some **severe underrepresentation problems**, since for example, there is ONLY one person (out of 2111!) that always drinks alcohol. Certainly, the weight won't be very well predicted if a person answers "always" to the question "How often do you drink alcohol?". This also means that this variable will be ALMOST a **constant** when we will dummify the main variable "alcohol", and so it won't provide much information! 
+
+It can even be dangerous, since the only warnings we have got came from a `preProcess` functionality inside the `caret` function `train()`, stating : *No variation for: alcohol_always*
+
+&nbsp;
+
+And the same (more or less) goes for the rest of the categories, with the exception of gender : there are almost as many women as men.
+
+&nbsp;
+
+Let's look at the correlations between the numerical variables.
 
 
 ```{r}
@@ -562,37 +579,40 @@ grid.arrange(plot_13, plot_14, ncol=2)
 
 cor.plot(na.omit(obesity [c(2,3,4)]))
 
-#comment on correlation and how we didnt do it for categorical variables
-
 ```
+
+As expected, there is a positive correlation between weight and height.
+
+The correlation between weight and age is also positive and the Pearson coefficient is 0.2... however we may expect a quadratic (and not linear!) behavior, since the older we get, the less we weight BUT after a certain threshold (maybe at around 70 years of age, it depends...).
+
+All in all, **there does not seem to be a high amount of correlation** between the numerical variables of the dataset.
 
 
 &nbsp;
 
 
 
-# Data Analysis
+# Model fitting
 
 ## Multiple Linear Regression
 
-We begin with a multiple linear regression model. We will first run a full model with (n-1) dummy categories included for each variable. In most cases the dummy that was excluded from the formula this the dummy which refered to the variable category "no" or equivalent. For instance, for the variable alcohol, we excluded the variable alcohol_no from the model formula.
+We begin with a multiple linear regression model. We will first run a full model with (n-1) dummy categories included for each variable. In most cases, the dummy that was excluded from the formula was the dummy which referred to the variable category "no" or equivalent. For instance, for the variable alcohol, we excluded the variable alcohol_no from the model formula.
 
 
 ```{r}
 
 # Linear regression
 
-#formula: Weight = Gender, Age, Height, 
-
 lm_weight <- lm(Weight ~ Gender + Age + Height + family_hist + eat_caloric + vegetables_sometimes +vegetables_always + main_meals_Btw_1_2 + main_meals_More_than_3 + food_inbetween_always + food_inbetween_frequently + food_inbetween_sometimes + smoke + CH2O_between_1_and_2 + CH2O_more_than_2 + monitor_cal + physical_act_1_2 +physical_act_2_4 + tech_1_hour+ tech_2_hours_or_more + alcohol_always + alcohol_frequently + alcohol_sometimes + mtrans_automobile + mtrans_bike + mtrans_public_transportation  , data = train.set)
 
 summary(lm_weight)
 plot(lm_weight)
 
-
-
 ```
 
+RESIDUAL ANALYSIS AND ASSUMPTION VALIDATIONS!!
+
+&nbsp;
 
 Looking at the model above, we have quite a lot of variables that are significant at a confidence level of 95%. The variables that are not significant are: food_inbetween_always, food_inbetween_sometimes, smoke, CH2O_between_1_and_2, tech_1_hour,alcohol_always, alcohol_frequently, mtrans_bike and mtrans_public_transportation.
 
@@ -600,9 +620,9 @@ Looking at the model above, we have quite a lot of variables that are significan
 
 Because there are many significant variables, we will not interpret all of them, instead, we will interpret some that we find interesting.
 
-* **Age**: An increase of 1 year of age corresponds to an average increase of 0.812 kg in weight, ceteris paribus.
+* **Age** : an increase of 1 year of age corresponds to an average increase of 0.812 kg in weight, ceteris paribus.
 
-* **main_meals_Btw_1_2**: An individual that eats between 1 and 2 main meals per day has an average decrease of 5.508 kg in comparison to an individual that eats three main meals per day.
+* **main_meals_Btw_1_2** : an individual that eats between 1 and 2 main meals per day has an average decrease of 5.508 Kg in comparison to an individual that eats three main meals per day.
 
 &nbsp;
 
@@ -611,37 +631,46 @@ Because we wish to select the best possible model for the linear regression, we 
 
 ```{r}
 
-#Stepwise model selection
+# Stepwise model selection
 
-#Forward
+# Forward
 lm_forward_obesity <- step(lm_weight, direction = "forward")
 summary(lm_forward_obesity)
-#AIC: 6999.41
-#Model : Weight ~ Gender + Age + Height + family_hist + eat_caloric + vegetables_sometimes + vegetables_always + main_meals_Btw_1_2 + main_meals_More_than_3 + food_inbetween_always + food_inbetween_frequently + food_inbetween_sometimes + smoke + CH2O_between_1_and_2 + CH2O_more_than_2 + monitor_cal + physical_act_1_2 + physical_act_2_4 + tech_1_hour + tech_2_hours_or_more + alcohol_always + alcohol_frequently + alcohol_sometimes + mtrans_automobile + mtrans_bike + mtrans_public_transportation
+
+# AIC: 6999.41
+
+# Model: Weight ~ Gender + Age + Height + family_hist + eat_caloric + vegetables_sometimes + vegetables_always + main_meals_Btw_1_2 + main_meals_More_than_3 + food_inbetween_always + food_inbetween_frequently + food_inbetween_sometimes + smoke + CH2O_between_1_and_2 + CH2O_more_than_2 + monitor_cal + physical_act_1_2 + physical_act_2_4 + tech_1_hour + tech_2_hours_or_more + alcohol_always + alcohol_frequently + alcohol_sometimes + mtrans_automobile + mtrans_bike + mtrans_public_transportation
 
 
-#Backward
+# Backward
 lm_backward_obesity <- step(lm_weight, direction = "backward")
 summary(lm_backward_obesity)
-#formula: Weight ~ Gender + Age + Height + family_hist + eat_caloric + vegetables_sometimes + vegetables_always + main_meals_Btw_1_2 +  main_meals_More_than_3 + food_inbetween_frequently + CH2O_more_than_2 + monitor_cal + physical_act_1_2 + physical_act_2_4 + tech_1_hour + tech_2_hours_or_more + alcohol_sometimes + mtrans_automobile + mtrans_public_transportation
 
-#AIC: 6988.52
+# AIC: 6988.52
 
-#Both
+# Model: Weight ~ Gender + Age + Height + family_hist + eat_caloric + vegetables_sometimes + vegetables_always + main_meals_Btw_1_2 +  main_meals_More_than_3 + food_inbetween_frequently + CH2O_more_than_2 + monitor_cal + physical_act_1_2 + physical_act_2_4 + tech_1_hour + tech_2_hours_or_more + alcohol_sometimes + mtrans_automobile + mtrans_public_transportation
+
+
+
+# Both
 lm_both_obesity <- step(lm_weight, direction = "both")
 summary(lm_both_obesity)
-#AIC: 6988.52
-#model:Weight ~ Gender + Age + Height + family_hist + eat_caloric + vegetables_sometimes + vegetables_always + main_meals_Btw_1_2 + main_meals_More_than_3 + food_inbetween_frequently + CH2O_more_than_2 + monitor_cal + physical_act_1_2 + physical_act_2_4 + tech_1_hour + tech_2_hours_or_more + alcohol_sometimes + mtrans_automobile + mtrans_public_transportation
 
-#Simplet model(both, backward)
+# AIC: 6988.52
 
-#Add comments +Assumptions
+# model: Weight ~ Gender + Age + Height + family_hist + eat_caloric + vegetables_sometimes + vegetables_always + main_meals_Btw_1_2 + main_meals_More_than_3 + food_inbetween_frequently + CH2O_more_than_2 + monitor_cal + physical_act_1_2 + physical_act_2_4 + tech_1_hour + tech_2_hours_or_more + alcohol_sometimes + mtrans_automobile + mtrans_public_transportation
+
+
 ```
 
 
 For the forward model, the stepwise selection shows us that the best model is: 
 
+&nbsp;
+
 **Weight ~ Gender + Age + Height + family_hist + eat_caloric + vegetables_sometimes + vegetables_always + main_meals_Btw_1_2 + main_meals_More_than_3 + food_inbetween_always + food_inbetween_frequently + food_inbetween_sometimes + smoke + CH2O_between_1_and_2 + CH2O_more_than_2 + monitor_cal + physical_act_1_2 + physical_act_2_4 + tech_1_hour + tech_2_hours_or_more + alcohol_always + alcohol_frequently + alcohol_sometimes + mtrans_automobile + mtrans_bike + mtrans_public_transportation**
+
+&nbsp;
 
 This is in fact the same model as the full model. It has an AIC of 6999.41, an R-Squared of 0.6464 and an ajusted R-Squared of 0.639.
 
@@ -649,21 +678,29 @@ This is in fact the same model as the full model. It has an AIC of 6999.41, an R
 
 For the backward model, the stepwise selection shows us that the best model is: 
 
+&nbsp;
+
 **Weight ~ Gender + Age + Height + family_hist + eat_caloric + vegetables_sometimes + vegetables_always + main_meals_Btw_1_2 +  main_meals_More_than_3 + food_inbetween_frequently + CH2O_more_than_2 + monitor_cal + physical_act_1_2 + physical_act_2_4 + tech_1_hour + tech_2_hours_or_more + alcohol_sometimes + mtrans_automobile + mtrans_public_transportation**
 
-This model is a reduced version of the full model.The AIC is 6988.52, the R-Squared is 0.6455 and the adjusted R-Squared is 0.6401.
+&nbsp;
+
+This model is a reduced version of the full model. The AIC is 6988.52, the R-Squared is 0.6455 and the adjusted R-Squared is 0.6401.
 
 &nbsp;
 
 For the both model we obtain the same results as the backward model. The best model is: 
 
-**Weight ~ Gender + Age + Height + family_hist + eat_caloric + vegetables_sometimes + vegetables_always + main_meals_Btw_1_2 + main_meals_More_than_3 + food_inbetween_frequently + CH2O_more_than_2 + monitor_cal + physical_act_1_2 + physical_act_2_4 + tech_1_hour + tech_2_hours_or_more + alcohol_sometimes + mtrans_automobile + mtrans_public_transportation**
+&nbsp;
 
-This model is a reduced version of the full model.The AIC is 6988.52, the R-Squared is 0.6455 and the adjusted R-Squared is 0.6401.
+**Weight ~ Gender + Age + Height + family_hist + eat_caloric + vegetables_sometimes + vegetables_always + main_meals_Btw_1_2 + main_meals_More_than_3 + food_inbetween_frequently + CH2O_more_than_2 + monitor_cal + physical_act_1_2 + physical_act_2_4 + tech_1_hour + tech_2_hours_or_more + alcohol_sometimes + mtrans_automobile + mtrans_public_transportation**
 
 &nbsp;
 
-When looking at all three models, the best model would seem to be the backward model(or the both model). It's adusted R-Squared is higher than the forward model by very little but is reduced and therefore favorable. We have very very similar results and insights from all three models but the backward model and the both model allow us to obtain those insights without having to drag around those variables that are not significant.
+This model is a reduced version of the full model. The AIC is 6988.52, the R-Squared is 0.6455 and the adjusted R-Squared is 0.6401.
+
+&nbsp;
+
+When looking at all three models, the best model would seem to be the backward model(or the both model). It's adjusted R-Squared is higher than the forward model by very little but is reduced and therefore favorable. We have very similar results and insights from all three models but the backward model and the both model allow us to obtain those insights without having to drag around those variables that are not significant.
 
 &nbsp;
 
@@ -672,42 +709,39 @@ To confirm our choice of model for the linear regression, we will proceed with t
 
 ```{r}
 
-#Predictions on the validation set
+# Predictions on the validation set
 
-#Forward model:
+# Forward model:
 forward_pred_obesity <- predict(lm_forward_obesity, valid.set)
 
-#RMSE
-gofRMSE(valid.set$Weight, forward_pred_obesity, dgt = 3) #16.376
-#Mean error
-gofME(valid.set$Weight, forward_pred_obesity, dgt = 3) #1.038
-#MAPE
-gofMAPE(valid.set$Weight, forward_pred_obesity, dgt = 3)#16.344
+# RMSE
+gofRMSE(valid.set$Weight, forward_pred_obesity, dgt = 3) # 16.376
+# Mean error
+gofME(valid.set$Weight, forward_pred_obesity, dgt = 3) # 1.038
+# MAPE
+gofMAPE(valid.set$Weight, forward_pred_obesity, dgt = 3) # 16.344
 
 
-#Backward model:
+# Backward model:
 backward_pred_obesity <- predict(lm_backward_obesity, valid.set)
 
-#RMSE
-gofRMSE(valid.set$Weight, backward_pred_obesity, dgt = 3) #16.416
-#Mean error
-gofME(valid.set$Weight, backward_pred_obesity, dgt = 3) #1.002
-#MAPE
-gofMAPE(valid.set$Weight, backward_pred_obesity, dgt = 3)#16.363
+# RMSE
+gofRMSE(valid.set$Weight, backward_pred_obesity, dgt = 3) # 16.416
+# Mean error
+gofME(valid.set$Weight, backward_pred_obesity, dgt = 3) # 1.002
+# MAPE
+gofMAPE(valid.set$Weight, backward_pred_obesity, dgt = 3) # 16.363
 
 
-#Both model:
+# Both model:
 both_pred_obesity <- predict(lm_both_obesity, valid.set)
 
-#RMSE
-gofRMSE(valid.set$Weight, both_pred_obesity, dgt = 3) #16.416
-#Mean error
-gofME(valid.set$Weight, both_pred_obesity, dgt = 3) #1.002
-#MAPE
-gofMAPE(valid.set$Weight, both_pred_obesity, dgt = 3)#16.363
-
-#Add comments +Assumptions
-
+# RMSE
+gofRMSE(valid.set$Weight, both_pred_obesity, dgt = 3) # 16.416
+# Mean error
+gofME(valid.set$Weight, both_pred_obesity, dgt = 3) # 1.002
+# MAPE
+gofMAPE(valid.set$Weight, both_pred_obesity, dgt = 3) # 16.363
 
 ```
 
@@ -720,122 +754,61 @@ Just as we had mentionned above, the backward model and the both model seem to r
 
 ## k-Nearest Neighbors
 
+There is one package called `caret` which includes already many of the steps which otherwise should be done manually, namely :
 
-First of all, we should normalize the data, since we have different scales and big values can dominate small values! We normalize only the numerical data.
+* Normalize the data (by creating a function , for instance).
+
+* Creating a function to de-normalize the data (in order to have a final prediction which is on the adequate scale).
+
+* Manually selecting the best "k" parameter (= number of neighbors) though comparison of the RMSE for different values of k. The k parameter which yields the smallest RMSE will be the best one.
+
+* Running the model with the best "k".
+
+
+In the `caret` package, we just need to run a `train()` function which already does all these steps!
+
+So let's begin...
+
 
 ```{r}
 
-# Normalizing the data :
-
-normalize <- function(x) {
-  return ((x - min(x)) / (max(x) - min(x)))
-}
-
-train.set.norm <- as.data.frame(lapply(train.set[, c(2:4)], normalize))
-
-valid.set.norm <- as.data.frame(lapply(valid.set[, c(2:4)], normalize))
-
-
-# Regrouping into final dataset, with replacement of non-normalized variables :
-
-train.final <- cbind(train.set.norm, train.set[, c(1, 5:36)])
-
-valid.final <- cbind(valid.set.norm, valid.set[, c(1, 5:36)])
-
-```
-
-A "denormalize" function will be very handy when converting the predicted weight back to its normal scale :
-
-```{r}
-
-denormalize <- function(x, y) {
-  
-  return ((x*(max(y) - min(y))) + min(y))
-  
-}
-
-```
-
-Now we will run the model JUST in order to identify different values of the **Root Mean Squared Error (RMSE)** :
-
-```{r}
-
-# Creating dataframe :
-
-rmse.df = data.frame(k = seq(1, 40, 1), RMSE = rep(0, 40))
-
-
-# Running the model :
+# Running the k-NN model :
 
 set.seed(1)
 
-for(i in 1:40){
-  
-  knn.pred = knn(
-    train = train.final[, -3],
-    test = valid.final[, -3],
-    cl = train.final[, 3],
-    k = i
-  )
-  
-  k_nn = as.numeric(as.character(knn.pred))
-  
-  predicted = denormalize(k_nn, valid.set[, 4])
-  
-  rmse.df[i, 2] = sqrt(mean((predicted-valid.set[, 4])^2))
-}
-
-
-# Plotting results :
-
-pander(rmse.df)
-
-plot(rmse.df$k, rmse.df$RMSE, xlab = "# of Neighbors", ylab = "RMSE", main = "Selecting the best 'k'")
-
-```
-
-We can see from this plot (but also fron the table above) that the best k is equal to 1. With this k = 1, we are able to minimize the RMSE.
-
-```{r}
-
-# Running the FINAL model (with k = 1):
+trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
 
 set.seed(1)
 
 k_nn <-
-  knn(
-    train = train.final[, -3],
-    test = valid.final[, -3],
-    cl = train.final[, 3],
-    k = 1
-  )
-
-k_nn = as.numeric(as.character(k_nn))
-
-predicted = denormalize(k_nn, valid.set[, 4])
+    train(
+        Weight ~ .,
+        data = train.set,
+        method = "knn",
+        trControl=trctrl,
+        preProcess = c("range")
+        
+    )
 
 
-RMSE = sqrt(mean((predicted-valid.set[, 4])^2))
-
-RMSE
+predicted = predict(k_nn, valid.set)
 
 ```
 
-The resulting RMSE is equal to 15.02754.
+A 10-fold Cross-Validation has been repeated 3 times, and the smallest RMSE was found when k = 5.
+
+The resulting RMSE is equal to 13.53326
 
 &nbsp;
 
 Let's now do a Regression Tree and ultimately compare its RMSE with the one of the k-NN!
 
 
-Weird! If we change the set.seed, the results for RMSE change!! So, which set.seed to choose?
-
-
 &nbsp;
 
 ## Regression Tree
 
-We will first focus on selecting the appropriate value for the Complexity Parameter (CP hereafter), which is a "penalty" factor concerning the size of the tree. A smaller CP will result in a bigger tree, and viceversa.
+We will first focus on selecting the appropriate value for the Complexity Parameter (CP hereafter), which is a "penalty" factor concerning the size of the tree. A smaller CP will result in a bigger tree, and vice versa.
 
 To do this, we will do a Cross-Validation approach. The computer will create many different partitions of the dataset into training and validation, and we want to find the CP that corresponds to the minimum Cross-Validation error.
 
@@ -943,7 +916,7 @@ The RMSE for the validation data is 13.25937.
 
 It is very normal that RMSE is smaller with the training data, because we have selected the optimal CP according to the training data. However, the difference seems not so big. 
 
-nyway, the RMSE which is of interest is the one for the validation set, since the validation data is "fresh and new", has not been used to adjust the model.
+Anyway, the RMSE which is of interest is the one for the validation set, since the validation data is "fresh and new", has not been used to adjust the model.
 
 &nbsp;
 
@@ -1026,13 +999,13 @@ plot(predicted_valid-valid.set[, 4], main = "Regression Tree", ylab = "Predicted
 
 VERY INTERESTING! 
 
-Actually we can see that we have the typical **trade-off between BIAS and VARIANCE**. 
+We can see that we have the typical **trade-off between BIAS and VARIANCE**. 
 
-Certainly, the k-NN seems to be more precise (less variance), since the points are less far apart from each other. BUT, we observe an upward trend, and the mean of the points (= errors) is at around 4, not 0!
+Certainly, the k-NN seems to be more precise (less variance), since the points are less far apart from each other. BUT, we observe an upward trend, and the mean of the points (= errors) is at around 2, not 0!
 
 So there is small bias in the k-NN.
 
-However, the regression tree has a lot of variance, BUT on average it is very precise (the mean of the errros is almost at zero). Indeed :
+However, the regression tree has more variance, BUT on average it is very precise (the mean of the errors is almost at zero). Indeed :
 
 ```{r}
 
@@ -1050,17 +1023,17 @@ mean(predicted_valid-valid.set[, 4])
 
 For the regression tree, the mean is very close to zero.
 
-So now we can discuss which model is better for us. Do we want a very accurate prediction although it may be around on average 4 Kg away from the truth? Or do we want a prediction which is very far from the truth but, taking into account all predictions, on average we are almost exactly on the target?
+So now, we can discuss which model is better for us. Do we want a very accurate prediction although it may be around on average 2 Kg away from the truth? Or do we want a prediction which is very far from the truth but, taking into account all predictions, on average we are almost exactly on the target?
 
 &nbsp;
 
-Probably we want something like the k-NN, since 4 Kg is not much.
+Probably we want something like the k-NN, since 2 Kg of error is not much.
 
 The regression tree is less biased and has smaller RMSE, BUT certainly the amount of error is very big (the differences predicted - actual are quite big). 
 
 &nbsp;
 
-Therefore, we may prefer the k-NN after all!
+**Therefore, we may prefer the k-NN after all!**
 
 
 &nbsp;
@@ -1085,7 +1058,7 @@ ensemble_df <-
     Ensemble_Method = (predicted + predicted_valid + backward_pred_obesity) / 3
   )
 
-head(ensemble_df)
+pander(head(ensemble_df))
 
 ```
 
@@ -1100,9 +1073,9 @@ RMSE_ensemble
 RMSE_total.df = data.frame(
   
     RMSE_MLR = 16.416,
-    RMSE_kNN = 15.02754,
+    RMSE_kNN = 13.53326,
     RMSE_Tree = 13.25937,
-    RMSE_Ensemble = 11.39791
+    RMSE_Ensemble = 12.05331
    
   )
 
@@ -1110,77 +1083,25 @@ pander(RMSE_total.df)
 
 ```
 
+The best model is the one with the smallest RMSE, which means the **ensemble method**. 
+
+This is not surprising, since usually ensemble techniques perform better than individual models!
 
 
+&nbsp;
+&nbsp;
 
-## Creating a person for prediction
+# Conclusion
 
+Ommited variable bias (income level correlated with MTRANS, and others)
 
-```{r}
+QUestions not very precise (the alcohol one...)
 
-# Creating a person for prediction :
+Compare project proposal with what we actually did! Explain problems we encountered (like with boosting), and why we changed the outcome variable to weight!
 
-example.df = obesity[1,]
+&nbsp;
 
-example.df$Gender = "Male"
-example.df$Age = 25
-example.df$Height = 1.78
-example.df$Weight = 70.0
-example.df$family_history = "no"
-example.df$eat_caloric = "no"
-example.df$vegetables = "Always"
-example.df$main_meals = "More_than_3"
-example.df$food_inbetween = "no"
-example.df$SMOKE = "no"
-example.df$CH2O = "Between 1 and 2 L"
-example.df$monitor_cal = "no"
-example.df$physical_act = "2 or 4 days"
-example.df$tech_devices = "Two_hours"
-example.df$alcohol = "no"
-example.df$MTRANS = "Walking"
-example.df$NObeyesdad = "Normal_Weight"
+# Shiny App
 
-
-
-example.df = to_factor(example.df)
-
-obesity_example = rbind(obesity_factor, example.df)
-
-obesity_example = dummify(obesity_example)   
-
-
-example.df = as.data.frame(obesity_example[2112, ])
-
-
-norm.values <- preProcess(obesity[, c(2:4)], method = "range")
-
-example.norm <- predict(norm.values, example.df)
-
-
-
-set.seed(1)
-
-k_nn_example <-
-  knn(
-    train = train.final[, -3],
-    test = example.norm[, -4],
-    cl = train.final[, 3],
-    k = 1
-  )
-
-k_nn_example = as.numeric(as.character(k_nn_example))
-
-predicted_example_knn = denormalize(k_nn_example, valid.set[, 4])
-
-
-predicted_example_tree = predict(tree_2, example.df)
-
-
-predicted_example_mlr = predict(lm_backward_obesity, example.df)
-
-
-ensemble_prediction = (predicted_example_knn + predicted_example_tree + predicted_example_mlr)/3
-
-```
-
+Put the link here
 
