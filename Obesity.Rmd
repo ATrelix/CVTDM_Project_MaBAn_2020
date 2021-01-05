@@ -570,6 +570,9 @@ And the same (more or less) goes for the rest of the categories, with the except
 
 &nbsp;
 
+
+ADD tech_devices
+
 Let's look at the correlations between the numerical variables.
 
 
@@ -1091,13 +1094,22 @@ This is not surprising, since usually ensemble techniques perform better than in
 &nbsp;
 &nbsp;
 
-# Conclusion
+# Conclusions
 
-Ommited variable bias (income level correlated with MTRANS, and others)
+## Discussion of results of the predictions
+
+...
+
+
+## Issues
+
+Ommited variable bias (income level correlated with MTRANS, and others) : confounding
 
 QUestions not very precise (the alcohol one...)
 
-Compare project proposal with what we actually did! Explain problems we encountered (like with boosting), and why we changed the outcome variable to weight!
+Compare project proposal with what we actually did! Explain problems we encountered (like with boosting), and why we changed the outcome variable to weight! (NObeyesdad removed because of multicollinearity issue)
+
+BMI is not very good cause doens't take fat % into account
 
 &nbsp;
 
