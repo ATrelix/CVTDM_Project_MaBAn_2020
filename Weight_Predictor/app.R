@@ -361,7 +361,7 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                     br(),
                     numericInput("Q2", "Q2 - How old are you?", "", min = 1, max = 100),
                     br(),
-                    numericInput("Q3", "Q3 - How tall are you (in meters)? (e.g. 1.56)", "", min = 1, max = 100),
+                    numericInput("Q3", "Q3 - How tall are you (in METERS, not cm)? (e.g. 1.56)", "", min = 1, max = 100),
                     br(),
                     
                     radioButtons("Q5", "Q4 - Has a family member suffered or suffers from overweight?", Q5, selected = character(0)),
@@ -401,7 +401,7 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                     br(),
                     br(),
                     
-                    paste("Please, scroll up to choose the model and get your predicted weight."),
+                    paste("Please, scroll up (if you are on a computer) and choose the model and get your predicted weight."),
                     
                     br(),
                     br(),
@@ -416,7 +416,7 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                 
                 sidebarPanel(
                     
-                    selectInput("models", label = "Please choose a model from the dropdown list below : ", choices = list("Multiple Linear Regression", "k-NN", "Regression Tree", "Ensemble")),
+                    selectInput("models", label = "Please choose a model from the dropdown list below : ", choices = list("Regression Tree", "k-NN", "Ensemble", "Multiple Linear Regression")),
                     
                     paste("Now, click here :"),
                     br(),
