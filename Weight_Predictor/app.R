@@ -321,10 +321,7 @@ predicted_valid <- predict(tree_2, valid.set)
     
     app.final.df = app.big.df[2112, ]
     
-    norm.app.values <- preProcess(obesity[, c(2:4)], method = "range")
-    
-    app.final.norm = predict(norm.app.values, app.final.df)
-    
+
 
 
 
@@ -341,7 +338,7 @@ Q9 <- c("No", "Sometimes", "Frequently", "Always")
 Q10 <- c("Yes", "No")
 Q11 <- c("Less than a liter", "Between 1 and 2 liters", "More than 2 liters")
 Q12 <- c("Yes", "No")
-Q13 <- c("I do not have", "Between 1 and 2 hours", "Between 2 and 4 hours")
+Q13 <- c("I do not have", "Between 1 and 2 days", "Between 2 and 4 days")
 Q14 <- c("0 hours", "1 hour", "2 hours or more")
 Q15 <- c("I do not drink", "Sometimes", "Frequently", "Every day")
 Q16 <- c("Automobile", "Motorbike", "Bike", "Public Transportation", "Walking")
@@ -365,8 +362,9 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                     br(),
                     br(),
                     
-                    paste("Please, answer a few questions to obtain some data about you."),
+                    paste("Please, answer a few questions to"),
                     br(),
+                    paste("obtain some data about you."),
                     br(),
                     br(),
                     
@@ -393,7 +391,7 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                     br(),
                     radioButtons("Q12", "Q11 - Do you monitor the calories you eat daily?", Q12, selected = character(0)),
                     br(),
-                    radioButtons("Q13", "Q12 - How often do you have physical activity?", Q13, selected = character(0)),
+                    radioButtons("Q13", "Q12 - How often during a week do you have physical activity?", Q13, selected = character(0)),
                     br(),
                     radioButtons("Q14", "Q13 - How much time do you daily use technological devices such as cell phone, videogames, 
                                  television, computer and others?", Q14, selected = character(0)),
@@ -413,8 +411,14 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                     
                     br(),
                     br(),
+                    
+                    paste("Please, scroll up to choose the model and get your predicted weight."),
+                    
                     br(),
                     br(),
+                    br(),
+                    br(),
+                    
                     
                     
                 ),
@@ -422,10 +426,9 @@ ui <- fluidPage(theme = shinytheme("flatly"),
               
                 
                 sidebarPanel(
-                    style = "position:fixed;width:inherit;",
-                    selectInput("models", label = "When you are done with the questions, please choose a model from the dropdown list below : ", choices = list("Multiple Linear Regression", "k-NN", "Regression Tree", "Ensemble")),
-                    br(),
-                    br(),
+                    
+                    selectInput("models", label = "Please choose a model from the dropdown list below : ", choices = list("Multiple Linear Regression", "k-NN", "Regression Tree", "Ensemble")),
+                    
                     paste("Now, click here :"),
                     br(),
                     actionButton(inputId = "calculate_weight", label = "Know your weight !", class="btn btn-secondary", icon = icon("child"), width = NULL),
@@ -435,15 +438,105 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                              verbatimTextOutput("weight_pred"),
                              paste("according to your daily habits."),
                              br(),
+                    br(),
+                    
+                    paste("Which means your BMI is"),
+                    verbatimTextOutput("bmi"),
+                    paste("considered as"),
+                    verbatimTextOutput("CDC"),
+                    paste("by the 'Centers for Disease Control and Prevention'")
                              
                 )
                             ),
                 
                 tabPanel("About",
                          
+                         br(),
+                         br(),
                          
-                         paste("This is us!"))
+                         paste("Welcome to our 'Weight Prediction' app!"),
+                               
+                         br(),
+                         br(),
+                         br(),     
+                         
+                               paste("This app was inspired by a recent study entitled 'Estimation of obesity levels based on based on eating habits and physical 
+                               condition in individuals from Colombia, Peru and Mexico' ("), 
+                         
+                         tags$a(href="http://archive.ics.uci.edu/ml/datasets/Estimation+of+obesity+levels+based+on+eating+habits+and+physical+condition+", "access the data here"),
+                         paste(")."),
+                         
+                         br(),
+                         paste("The official study presentation is found "),
+                         tags$a(href="https://www.sciencedirect.com/science/article/pii/S2352340919306985?via%3Dihub", "here"),           
+                         paste("."),
+                         
+                         br(),
+                         paste("The questions found in the app are taken from the questionnaire found in the study."), 
+                               
+                         br(),
+                         br(),
+                         
+                         paste("We accessed the data collected in the study and did a proper data cleaning and pre-processing, followed with a data analysis and weight predictions using several statistical models."),
+                         
+                         br(),
+                         paste("Our paper (in .pdf) can be downloaded "),
+                         tags$a(href="http://archive.ics.uci.edu/ml/datasets/Estimation+of+obesity+levels+based+on+eating+habits+and+physical+condition+", "here"),
+                              
+                         br(),
+                         br(),
+                         br(),
+                         
+                               paste("In this app you will have the liberty to choose with prediction model you wish to predict your weight. 
+                               The predicted weight is in Kg. Once your weight has been predicted, 
+                               your Body Mass Index will be calculted using this formula : "),
+                         
+                         withMathJax(),
+                         
+                         helpText("$$\\text{BMI = }\\frac{Weight}{Height^2}$$"),
+                         
+                         br(),
+                         br(),
+                         
+                               paste("With your BMI value, your weight will be classified 
+                               in one of the weight classes defined by the 'Centers for Disease Control and Prevention' (CDC) ("),
+                               
+                               tags$a(href = "https://www.cdc.gov/obesity/adult/defining.html", "official CDC classification"), 
+                        
+                          paste(")."),
+                         
+                         br(),
+                         br(),
+                         
+                               
+                               paste("This app is in no way representative of medical knowledge and simply intented for 
+                                     prediction purposes."),
+                               
+                         br(),
+                         br(),
+                         
+                                     paste("Enjoy! \U1F600"),
+                         
+                         br(),
+                         br(),
+                         br(),
+                         br(),
+                         
+                         tags$u("Data Analysts"), paste(" : "), 
+                         br(),
+                         br(),
+                         tags$b("Laurence T\U00E9treault-Falsafi"), paste("("), tags$a(href = "https://www.linkedin.com/in/laurence-t%C3%A9treault-falsafi/", "LinkedIn"), paste(")"),
+                         br(),
+                         tags$b("\U00C1ngel Tom\U00E1s-Ripoll"), paste("("), tags$a(href = "https://www.linkedin.com/in/%C3%A1ngel-tom%C3%A1s-ripoll-b20b671a1/", "LinkedIn"), paste(")"), paste(" "), paste("("), tags$a(href = "https://www.youtube.com/channel/UCIn7omSnyj3LNhKlymIQzcQ", "YouTube"), paste(")"),
+                         
+                         br(),
+                         br(),
+                         br(),
+                         br()
+                                     
+                                     
 
+)
 )
 )
 
@@ -457,19 +550,35 @@ server <- function(input, output) {
         
     })
     
+    output$bmi <- renderText({
+        
+        
+        paste(" ")
+        
+        
+    })
+    
+    output$CDC <- renderText({
+        
+        
+        paste(" ")
+        
+        
+    })
+    
     observeEvent(input$save, {
         
         if(input$Q1 == "Male"){app.final.df[, 1] = 0}
         if(input$Q1 == "Female"){app.final.df[, 1] = 1}
         
         app.final.df[, 2] = input$Q2
-        app.final.norm[, 2] = (input$Q2 - min(train.set[, 2]))/(max(train.set[, 2]) - min(train.set[, 2]))
+        
         
         app.final.df[, 3] = input$Q3
-        app.final.norm[, 3] = (input$Q3 - min(train.set[, 3]))/(max(train.set[, 3]) - min(train.set[, 3]))
         
-        app.final.df[, 4] = input$Q4
-        app.final.norm[, 4] = (input$Q4 - min(train.set[, 4]))/(max(train.set[, 4]) - min(train.set[, 4]))
+        
+        
+        
         
         if(input$Q5 == "Yes"){app.final.df[, 5] = 1}
         if(input$Q5 == "No"){app.final.df[, 5] = 0}
@@ -501,8 +610,8 @@ server <- function(input, output) {
         if(input$Q12 == "No"){app.final.df[, 21] = 0}
         
         if(input$Q13 == "I do not have"){app.final.df[, 22] = 0 ; app.final.df[, 23] = 0 ; app.final.df[, 24] = 1}
-        if(input$Q13 == "Between 1 and 2 hours"){app.final.df[, 22] = 1 ; app.final.df[, 23] = 0 ; app.final.df[, 24] = 0}
-        if(input$Q13 == "Between 2 and 4 hours"){app.final.df[, 22] = 0 ; app.final.df[, 23] = 1 ; app.final.df[, 24] = 0}
+        if(input$Q13 == "Between 1 and 2 days"){app.final.df[, 22] = 1 ; app.final.df[, 23] = 0 ; app.final.df[, 24] = 0}
+        if(input$Q13 == "Between 2 and 4 days"){app.final.df[, 22] = 0 ; app.final.df[, 23] = 1 ; app.final.df[, 24] = 0}
         
         if(input$Q14 == "0 hours"){app.final.df[, 25] = 0 ; app.final.df[, 26] = 0 ; app.final.df[, 27] = 1}
         if(input$Q14 == "1 hour"){app.final.df[, 25] = 1 ; app.final.df[, 26] = 0 ; app.final.df[, 27] = 0}
@@ -527,10 +636,41 @@ server <- function(input, output) {
                 
                 mlr = predict(lm_backward_obesity, app.final.df) 
                 
+                height = app.final.df[, 3]
+                
                 output$weight_pred <- renderText({
                     
                     paste(round(mlr, 2))
                     
+                    
+                    
+                })
+                
+                output$bmi <- renderText({
+                    
+                    bmi = mlr/(height*height)
+                    paste(round(bmi, 1))
+                    
+                    
+                })
+                
+                output$CDC <- renderText({
+                    
+                    bmi = mlr/(height*height)
+                    bmi_round = round(bmi, 1)
+                    
+                    
+                    if(bmi_round < 50.0){
+                        
+                        if(bmi_round <= 18.5){paste("underweight")}
+                        else { if(bmi_round <= 25.0){paste("normal")}
+                            else {
+                        if(bmi_round <= 30.0){paste("overweight")}
+                                
+                        else{paste("obesity")}
+                            }
+                        }
+                    }
                 })
                 
             }
@@ -542,7 +682,7 @@ server <- function(input, output) {
                     
                     knn.app = predict(k_nn, app.final.df)
                    
-                    
+                    height = app.final.df[, 3]
                 
                     output$weight_pred <- renderText({
                         
@@ -551,8 +691,32 @@ server <- function(input, output) {
                         
                     })
                     
-                    output$df <- renderDataTable(app.final.norm)
+                    output$bmi <- renderText({
+                        
+                        bmi = knn.app/(height*height)
+                        paste(round(bmi, 1))
+                        
+                        
+                    })
                     
+                    output$CDC <- renderText({
+                        
+                        bmi = knn.app/(height*height)
+                        bmi_round = round(bmi, 1)
+                        
+                        
+                        if(bmi_round < 50.0){
+                            
+                            if(bmi_round <= 18.5){paste("underweight")}
+                            else { if(bmi_round <= 25.0){paste("normal")}
+                                else {
+                                    if(bmi_round <= 30.0){paste("overweight")}
+                                    
+                                    else{paste("obesity")}
+                                }
+                            }
+                        }
+                    })
                 }
             
            
@@ -561,7 +725,7 @@ server <- function(input, output) {
                 
                 tree.app = predict(tree_2, app.final.df)
                 
-                
+                height = app.final.df[, 3]
                 
                 output$weight_pred <- renderText({
                     
@@ -570,12 +734,39 @@ server <- function(input, output) {
                     
                 })
                 
+                output$bmi <- renderText({
+                    
+                    bmi = tree.app/(height*height)
+                    paste(round(bmi, 1))
+                    
+                    
+                })
+                
+                output$CDC <- renderText({
+                    
+                    bmi = tree.app/(height*height)
+                    bmi_round = round(bmi, 1)
+                    
+                    
+                    if(bmi_round < 50.0){
+                        
+                        if(bmi_round <= 18.5){paste("underweight")}
+                        else { if(bmi_round <= 25.0){paste("normal")}
+                            else {
+                                if(bmi_round <= 30.0){paste("overweight")}
+                                
+                                else{paste("obesity")}
+                            }
+                        }
+                    }
+                })
                 
                 
             }
             
             if(input$models == "Ensemble"){
                 
+                height = app.final.df[, 3]
                 
                 tree.app = predict(tree_2, app.final.df)
                 
@@ -593,7 +784,32 @@ server <- function(input, output) {
                     
                 })
                 
+                output$bmi <- renderText({
+                    
+                    bmi = ensemble/(height*height)
+                    paste(round(bmi, 1))
+                    
+                    
+                })
                 
+                output$CDC <- renderText({
+                    
+                    bmi = ensemble/(height*height)
+                    bmi_round = round(bmi, 1)
+                    
+                    
+                    if(bmi_round < 50.0){
+                        
+                        if(bmi_round <= 18.5){paste("underweight")}
+                        else { if(bmi_round <= 25.0){paste("normal")}
+                            else {
+                                if(bmi_round <= 30.0){paste("overweight")}
+                                
+                                else{paste("obesity")}
+                            }
+                        }
+                    }
+                })
                 
             }
             
@@ -601,6 +817,7 @@ server <- function(input, output) {
         
         )
     
+     
     }
     
     

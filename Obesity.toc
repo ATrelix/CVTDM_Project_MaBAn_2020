@@ -1,10 +1,12 @@
 \contentsline {section}{Introduction}{1}{section*.2}%
 \contentsline {section}{Data Pre-Processing}{5}{section*.3}%
-\contentsline {section}{Exploratory Data Analysis}{12}{section*.4}%
-\contentsline {section}{Model fitting}{22}{section*.5}%
-\contentsline {subsection}{Multiple Linear Regression}{22}{section*.6}%
-\contentsline {subsection}{k-Nearest Neighbors}{47}{section*.7}%
-\contentsline {subsection}{Regression Tree}{48}{section*.8}%
-\contentsline {subsection}{Ensemble Method (MLR + k-NN + Regression Tree)}{60}{section*.9}%
-\contentsline {section}{Conclusion}{61}{section*.10}%
-\contentsline {section}{Shiny App}{61}{section*.11}%
+\contentsline {section}{Exploratory Data Analysis}{13}{section*.4}%
+\contentsline {section}{Model fitting}{23}{section*.5}%
+\contentsline {subsection}{Multiple Linear Regression}{23}{section*.6}%
+\contentsline {subsection}{k-Nearest Neighbors}{48}{section*.7}%
+\contentsline {subsection}{Regression Tree}{49}{section*.8}%
+\contentsline {subsection}{Ensemble Method (MLR + k-NN + Regression Tree)}{61}{section*.9}%
+\contentsline {section}{Conclusions}{62}{section*.10}%
+\contentsline {subsection}{Discussion of the prediction results}{62}{section*.11}%
+\contentsline {subsection}{Issues}{63}{section*.12}%
+\contentsline {section}{Shiny App}{64}{section*.13}%
