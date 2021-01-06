@@ -1,28 +1,17 @@
-library(shinyjs)
 library(shinythemes)
 library(shiny)
-library(pander)
 library(dplyr)
 library(gt)
 library(car)
 library(gridExtra)
 library(psych)
-library(corrplot)
 library(ellipse)
 library(dummies)
 library(nnet)
 library(class)
 library(caret)
 library(rpart)
-library(rpart.plot)
-library(ehaGoF)
 library(forecast)
-
-
-
-# Working Directory :
-
-setwd("~/GitHub/CVTDM_Project_MaBAn_2020")
 
 
 # Reading the data :
@@ -348,7 +337,7 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                 
                 
                 
-                titlePanel(h1("Weight Predictor", align = "center")),
+                column(7,offset = 4, titlePanel("Weight Predictor")),
               
                 div(img(src="picture.jpg", height="20%", width="20%"), style="text-align: center;"),
                 
@@ -453,6 +442,18 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                          
                          br(),
                          br(),
+                         tags$u("created by"), paste(" : "),
+                         br(),
+                         br(),
+                         tags$b("Laurence T\U00E9treault-Falsafi"), paste("("), tags$a(href = "https://www.linkedin.com/in/laurence-t%C3%A9treault-falsafi/", "LinkedIn"), paste(")"),
+                         br(),
+                         tags$b("\U00C1ngel Tom\U00E1s-Ripoll"), paste("("), tags$a(href = "https://www.linkedin.com/in/%C3%A1ngel-tom%C3%A1s-ripoll-b20b671a1/", "LinkedIn"), paste(")"), paste(" "), paste("("), tags$a(href = "https://www.youtube.com/channel/UCIn7omSnyj3LNhKlymIQzcQ", "YouTube"), paste(")"),
+                         
+                         
+                         br(),
+                         br(),
+                         br(),
+                         br(),
                          
                          paste("Welcome to our 'Weight Prediction' app!"),
                                
@@ -481,7 +482,7 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                          
                          br(),
                          paste("Our paper (in .pdf) can be downloaded "),
-                         tags$a(href="http://archive.ics.uci.edu/ml/datasets/Estimation+of+obesity+levels+based+on+eating+habits+and+physical+condition+", "here"),
+                         tags$a(href="https://mega.nz/file/9RZxiCgL#VBuGYUgyLanGWP1R7XeIG4mO_sDSlbx2HJW6OfwslXw", "here"),
                               
                          br(),
                          br(),
@@ -522,17 +523,7 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                          br(),
                          br(),
                          
-                         tags$u("Data Analysts"), paste(" : "), 
-                         br(),
-                         br(),
-                         tags$b("Laurence T\U00E9treault-Falsafi"), paste("("), tags$a(href = "https://www.linkedin.com/in/laurence-t%C3%A9treault-falsafi/", "LinkedIn"), paste(")"),
-                         br(),
-                         tags$b("\U00C1ngel Tom\U00E1s-Ripoll"), paste("("), tags$a(href = "https://www.linkedin.com/in/%C3%A1ngel-tom%C3%A1s-ripoll-b20b671a1/", "LinkedIn"), paste(")"), paste(" "), paste("("), tags$a(href = "https://www.youtube.com/channel/UCIn7omSnyj3LNhKlymIQzcQ", "YouTube"), paste(")"),
                          
-                         br(),
-                         br(),
-                         br(),
-                         br()
                                      
                                      
 
@@ -541,6 +532,9 @@ ui <- fluidPage(theme = shinytheme("flatly"),
 )
 
 server <- function(input, output) {
+    
+    
+    
     
     output$weight_pred <- renderText({
         

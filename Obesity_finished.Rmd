@@ -1,0 +1,1176 @@
+---
+title: "Data Mining Project (Master in Business Analytics, 2020 - 2021)"
+subtitle: "Predicting obesity levels according to daily habits"
+
+author: | 
+  | by : Ángel Tomás-Ripoll & Laurence Tétreault-Falsafi
+  | 
+  | University of Geneva
+
+
+output:
+  pdf_document:
+    toc: true
+    
+urlcolor: blue
+geometry: "left=2.5cm,right=2.5cm,top=1cm,bottom=2.5cm"
+fontsize: 12pt
+  
+---
+
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+
+# Introduction
+
+For this project, our objective was to predict the expected weight level (in Kg) for a given person depending on certain daily habits (eating and physical activity) and on the person's age, gender and height. 
+
+To do this, we found a quite interesting dataset (click here : http://archive.ics.uci.edu/ml/datasets/Estimation+of+obesity+levels+based+on+eating+habits+and+physical+condition+) containing 2111 observations and 17 variables (mainly categorical). We will base our analysis on the dataset and the questionnaire questions found in this study. 
+
+&nbsp;
+
+Please, find here a manually created metadata table :  
+
+
+```{r, include=FALSE}
+
+knitr::opts_chunk$set(
+  
+  warning = FALSE, message = FALSE
+  
+)
+
+```
+
+```{r}
+
+# To adjust the page margins when knitting to PDF :
+
+library(knitr)
+opts_chunk$set(tidy.opts=list(width.cutoff=45),tidy=TRUE)
+
+```
+
+
+```{r message=FALSE, warning=FALSE}
+
+# Used packages :
+
+library(pander)
+library(dplyr)
+library(gt)
+library(car)
+library(ggplot2)
+library(gridExtra)
+library(psych)
+library(corrplot)
+library(ellipse)
+library(dummies)
+library(nnet)
+library(class)
+library(caret)
+library(rpart)
+library(rpart.plot)
+library(ehaGoF)
+library(forecast)
+
+
+# Working Directory :
+
+setwd("~/GitHub/CVTDM_Project_MaBAn_2020")
+
+
+# Reading the data :
+
+obesity <- read.csv("Obesity.csv", header=T, sep=",")
+attach(obesity)
+
+#keeping a copy of the original dataset
+obesity_original <- obesity
+
+
+# Small metadata table :
+
+tibble_table <- 
+  tibble(
+    "Variable Name" = c(colnames(obesity)[1:14], "", colnames(obesity)[15:17]),
+    Description = c("Gender", "Age", "Height", "Weight", "Has a family member suffered or suffers from overweight?", "Do you eat high caloric food frequently?", "Do you usually eat vegetables in your meals?", "How many main meals do you have daily?", "Do you eat any food between meals?", "Do you smoke?", "How much water do you drink daily?", "Do you monitor the calories you eat daily?", "How often do you have physical activity?", "How much time do you use technological devices such as", "cell phone videogames, television, computer and others?", "How often do you drink alcohol?", "Which transportation do you usually use?", "Obesity level based on calculation of Mass Body Index")
+  )
+
+metadata <- gt(data = tibble_table)
+
+metadata %>%
+  tab_header(title = md("**Metadata**"),
+             subtitle = "from the dataset we are using") %>%
+  
+  tab_source_note(source_note = "Based on information in : 
+                  
+  https://www.sciencedirect.com/science/article/pii/S2352340919306985")
+
+```
+
+&nbsp;
+
+Here is a small overview of the first observations :
+
+```{r}
+
+pander(head(obesity))
+
+```
+
+The variable chosen as the variable of interest is "Weight", it will be our dependent variable.
+
+This dataset seems to be of high quality, because it has no missing observations, and our subsequent exploratory analysis will tell us if there are outliers to process.
+
+&nbsp;
+
+We will first begin with a basic data pre-processing which will be followed by a Data Exploratory Analysis. We will develop several models in order to accurately predict the level of weight of each individual.
+
+&nbsp;
+
+**The models will be :**
+
+**1. Multiple Linear Regression** 
+
+**2. Regression tree** 
+
+**3. k-Nearest Neighbors**
+
+**4. Ensemble Method**
+
+
+We will deploy the best model based on error metrics and prediction performance.
+
+&nbsp;
+&nbsp;
+
+Finally, there is a **Shiny App** available (here : https://angeltomasripoll.shinyapps.io/weight_predictor/), in which any user can fill-in a questionnaire concerning daily habits, age, gender and height.The questions found in the questionnaire are the same as the questions used in the dataset. The App will then the user what is the expected weight (in Kg) according to those characteristics based on the models developped in this analysis. Quite handy indeed, if you do not have a weighing machine nearby!
+
+The user will also be able to select the type of model that will predict the results. That way, it will be interesting to see, with just a few clicks, how each model will yield different results.
+
+The Shiny App will calculate the Body Mass Index ( $ = Weight / Height^2 $) and classify the person according to the Centers for Disease Control and Prevention (CDC) classification (https://www.cdc.gov/obesity/adult/defining.html).
+
+
+&nbsp;
+
+
+# Data Pre-Processing
+
+The first step before starting the  analysis is the data pre-processing. While the dataset used in this analysis is of overall good quality, there is a need for dummyfication and tweaking of some variables. The strategy used for the pre-processing of this dataset is:
+
+* Removing missing values
+
+* Changing column names
+
+* Binning variables
+
+* Converting categorical variables to factors
+
+* Dummyfying categorical variables
+
+* Partitionning the dataset
+
+
+We will begin with removing any missing values that could be present in the dataset.
+
+```{r}
+# Checking if there are Missing Values :
+
+sum(is.na(obesity))
+
+```
+
+
+There are no missing values in our dataset, therefore no missing values to remove. We can then proceed with changing some of the variable names that are confusing. We are changing the names of columns 5 to 9 and columns 12 to 15.
+
+```{r}
+
+# Changing column names:
+
+names(obesity)[5] = "family_history"
+names(obesity)[6] = "eat_caloric"
+names(obesity)[7] = "vegetables"
+names(obesity)[8] = "main_meals"
+names(obesity)[9] = "food_inbetween"
+names(obesity)[12] = "monitor_cal"
+names(obesity)[13] = "physical_act"
+names(obesity)[14] = "tech_devices"
+names(obesity)[15] = "alcohol"
+
+```
+
+&nbsp;
+
+We then look at the structure of dataset obesity to have a general idea of it's type of variables.
+
+```{r}
+
+# Checking the dataset structure :
+
+pander(str(obesity))
+
+pander(summary(obesity[, 2:4]))
+
+```
+
+
+Many variables in this dataset are numerical and continuous between a range (for example `vegetables`, inside the range 1 to 3). We will transform these numerical variables into categorical variables in order to simplify our analysis. This is, somehow, "binning". For this step, we will follow the categories of each variable given in the information file of the study, referred to earlier (https://www.sciencedirect.com/science/article/pii/S2352340919306985).
+
+To make this task easier, we created a function that bins variables. This function is named "binning".
+
+```{r}
+
+# Binning some numerical variables :
+
+
+binning <- function(x) {
+  
+  #vegetables 
+
+x$vegetables[x$vegetables <= 1] <- "Never"
+
+x$vegetables[x$vegetables > 1 & x$vegetables <=2] <- "Sometimes"
+
+x$vegetables[x$vegetables > 2 & x$vegetables <=3] <- "Always"
+
+
+#main_meals
+
+x$main_meals[x$main_meals >= 1 & x$main_meals < 3] <- "Btw_1_&_2"
+
+x$main_meals[x$main_meals == 3] <- "Three"
+
+x$main_meals[x$main_meals > 3 & x$main_meals <= 4] <- "More_than_3"
+
+
+#tech_devices
+
+x$tech_devices[x$tech_devices >= 0 & x$tech_devices <= 0.5] <- "Zero_hours"
+
+x$tech_devices[x$tech_devices <= 1.5] <- "One_hour"
+
+x$tech_devices[x$tech_devices <= 2] <- "Two_hours"
+
+
+#physical_act
+
+x$physical_act[x$physical_act < 1] <- "I do not have"
+
+x$physical_act[x$physical_act >= 1 & x$physical_act <= 2] <- "1 or 2 days"
+
+x$physical_act[x$physical_act >= 2 & x$physical_act <= 4] <- "2 or 4 days"
+
+x$physical_act[x$physical_act >= 4 & x$physical_act <= 5] <- "4 or 5 days"
+
+
+#CH2O
+
+x$CH2O[x$CH2O <= 1] <- "Less than a liter"
+
+x$CH2O[x$CH2O <= 2] <- "Between 1 and 2 L"
+
+x$CH2O[x$CH2O <=3] <- "More than 2 L"
+
+
+return(x)  
+  
+}
+
+
+obesity_bin = binning(obesity)
+
+
+```
+
+As we saw with the `str()` function, all the categorical variables are presently treated as character variables. Since we need categorical variables for our models to work adequately, we will convert all the categorical variables to factor type variables.
+
+&nbsp;
+
+Just as we did with the binning, we created a function to convert character variables into factor variables. This function is named `to_factor()`.
+
+```{r message=FALSE, warning=FALSE}
+
+# Converting character variables to factor :
+
+
+to_factor <- function(x) {
+  
+x$Gender = as.factor(x$Gender)
+x$family_history = as.factor(x$family_history)
+x$eat_caloric = as.factor(x$eat_caloric)
+x$food_inbetween = as.factor(x$food_inbetween)
+x$SMOKE = as.factor(x$SMOKE)
+x$monitor_cal = as.factor(x$monitor_cal)
+x$alcohol = as.factor(x$alcohol)
+x$MTRANS = as.factor(x$MTRANS)
+x$NObeyesdad = as.factor(x$NObeyesdad)
+x$vegetables = as.factor(x$vegetables)
+x$main_meals= as.factor(x$main_meals)
+x$CH2O= as.factor(x$CH2O)
+x$physical_act= as.factor(x$physical_act)
+x$tech_devices= as.factor(x$tech_devices)
+
+return(x)
+
+}
+
+obesity_factor = to_factor(obesity_bin)
+
+```
+
+
+&nbsp;
+
+We will now proceed with the dummification of the categorical variables. All variables (with the exception of gender, age, height and weight) went through the dummification process. 
+
+The dummification process is necessary as we wish to appropriately represent the sub-groups of each variable in the dataset. Some categories of variables were ommitted in the dummification process since there were no observations for a specific sub-group. These two variables with ommited sub-groups are `physical_act` and `tech_devices`. 
+
+The variable `physical_act` had 4 defined categories in the questionnaire, however there we no observations in the "4-5 hours" sub-group, therefore it was removed. The variable `tech_devices` had 3 sub-groups, however, there were no observations in the second (3-5 hours) and third (more than 5 hours) subgroup. In order to make this sub-group more insightful, we decided to bin the variables within the first sub-group only, resulting in three new categories.
+
+
+```{r}
+
+# Dummyfing the binary variables(family_history, eat_caloric, SMOKE, and monitor_cal) :
+
+
+dummify <- function(x) {
+  
+  # Gender 1 = female, 0 = male
+obesity_dummy <- cbind(dummy(x$Gender, sep = "_"), x[2:17])
+names(obesity_dummy)[1] <- c("Gender")
+obesity_dummy <- subset(obesity_dummy, select = -c(2) )
+
+
+# family_history 1 = yes, 0 = no
+obesity_dummy <- cbind( obesity_dummy[1:4], dummy(obesity_dummy$family_hist, sep = "_"), obesity_dummy[6:17])
+names(obesity_dummy)[6] <- c("family_hist")
+obesity_dummy <- subset(obesity_dummy, select = -c(5) )
+
+
+# eat_caloric with 1 = yes, 0 = no
+obesity_dummy <- cbind( obesity_dummy[1:5], dummy(obesity_dummy$eat_caloric, sep = "_"), obesity_dummy[7:17])
+names(obesity_dummy)[7] <- c("eat_caloric")
+obesity_dummy <- subset(obesity_dummy, select = -c(6) )
+
+
+# SMOKE 1 = yes, 0 = no
+obesity_dummy <- cbind( obesity_dummy[1:9], dummy(obesity_dummy$SMOKE, sep = "_"), obesity_dummy[11:17])
+names(obesity_dummy)[11] <- c("smoke")
+obesity_dummy <- subset(obesity_dummy, select = -c(10) )
+
+
+# monitor_cal 1 = yes, 0 = no
+obesity_dummy <- cbind( obesity_dummy[1:11], dummy(obesity_dummy$monitor_cal, sep = "_"), obesity_dummy[13:17])
+names(obesity_dummy)[13] <- c("monitor_cal")
+obesity_dummy <- subset(obesity_dummy, select = -c(12) )
+
+
+
+# Dummmyfying the categorical variables
+
+# vegetables 
+obesity_dummy <- cbind(obesity_dummy[1:6], dummy(obesity_dummy$vegetables, sep = "_"), obesity_dummy[8:17])
+names(obesity_dummy)[7:9] <- c("vegetables_always","vegetables_never","vegetables_sometimes")
+
+# main_meals
+obesity_dummy <- cbind(obesity_dummy[1:9], dummy(obesity_dummy$main_meals, sep = "_"), obesity_dummy[11:19])
+names(obesity_dummy)[10:12] <- c("main_meals_Btw_1_2","main_meals_More_than_3","main_meals_three")
+
+# food_in_between
+obesity_dummy <- cbind(obesity_dummy[1:12], dummy(obesity_dummy$food_inbetween, sep = "_"), obesity_dummy[14:21])
+names(obesity_dummy)[13:16] <- c("food_inbetween_always","food_inbetween_frequently","food_inbetween_no", "food_inbetween_sometimes")
+
+# alcohol
+obesity_dummy <- cbind(obesity_dummy[1:21], dummy(obesity_dummy$alcohol, sep = "_"), obesity_dummy[23:24])
+names(obesity_dummy)[22:25] <- c("alcohol_always","alcohol_frequently","alcohol_no", "alcohol_sometimes")
+
+# MTRANS
+obesity_dummy <- cbind(obesity_dummy[1:25], dummy(obesity_dummy$MTRANS, sep = "_"), obesity_dummy[27])
+names(obesity_dummy)[26:30] <- c("mtrans_automobile","mtrans_bike","mtrans_motorbike", "mtrans_public_transportation", "mtrans_walking")
+
+# CH2O
+obesity_dummy <- cbind(obesity_dummy[1:17], dummy(obesity_dummy$CH2O, sep = "_"), obesity_dummy[19:31])
+names(obesity_dummy)[18:20] <- c("CH2O_between_1_and_2","CH2O_less_than_a_liter","CH2O_more_than_2")
+
+# physical_act
+obesity_dummy <- cbind(obesity_dummy[1:21], dummy(obesity_dummy$physical_act, sep = "_"), obesity_dummy[23:33])
+names(obesity_dummy)[22:24] <- c("physical_act_1_2","physical_act_2_4", "physical_act_do_not_have")
+
+
+# tech_devices : this one is a little bit tricky since there a many categories but only one is represented within the data!
+
+obesity_dummy <- cbind(obesity_dummy[1:24], dummy(obesity_dummy$tech_devices, sep = "_"), obesity_dummy[26:35])
+names(obesity_dummy)[25:27] <- c("tech_1_hour", "tech_2_hours_or_more", "tech_0_hours")
+
+#Removing the variable NObeyesdad
+obesity_dummy <- subset(obesity_dummy[c(1:36)])
+
+return(obesity_dummy)
+  
+}
+
+obesity_dum = dummify(obesity_factor)
+
+
+```
+
+Following the dummification, we opted to remove the variable `NObeyesdad` as we feared there would be a multicollinearity issue since the variable `NObeyesdad` represented an obesity classification which was based on the Body Mass Index (BMI) formula, which has weight and height as inputs. 
+
+This then implies that the predicted variable will be the weight, which can then be used alongside the height to calculate the BMI of each individual (see the Shiny App).
+
+&nbsp;
+
+Finally, the last step in the data pre-processing is the partitioning of the data. We partitioned the data into a 60% training set and a 40% validation set. Because we have a relatively small number of observations (only 2111 observations), we thought it best to exclude a test set. However, better results could be obtained if we kept a third "test set".
+
+
+```{r}
+
+# Partitioning the data (60% training, 40% validation)
+
+set.seed(1)
+
+train.obs <- sample(rownames(obesity_dum), dim(obesity_dum)[1]*0.6)
+train.set <- obesity_dum[train.obs, ]  
+
+set.seed(1)
+ 
+valid.obs <- setdiff(rownames(obesity_dum), train.obs)
+valid.set <- obesity_dum[valid.obs, ]
+
+```
+
+
+Now that we have finished with the data pre-processing, we can proceed with the **Exploratory Data Analysis**. 
+
+While we have dummified variables in the steps above, the original non-dummified versions of the variables will be used in the exploratory data analysis for visualization purposes.
+
+&nbsp;
+
+# Exploratory Data Analysis
+
+
+```{r}
+
+ggplot(data=obesity, aes(x=NObeyesdad)) + 
+  geom_bar(aes(y = ..prop.., group = 1)) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
+
+```
+
+We see that the distribution of observations across the different levels of weight sub-groups is quite uniform, meaning that we do not have an unbalanced data set with respect to our variable of interest (the weight). The two sub-groups with the highest proportions seem to be "Obesity type 1" and "Obesity type 3", respectively.
+
+&nbsp;
+
+In order to visualize the distribution of observations across the variables of the data set, we will plot some variables. We begin with the histograms of the continuous variables in the dataset, followed by boxplots.
+
+
+```{r}
+
+# Creating histograms :
+
+multi.hist(obesity[,2:4], density = TRUE)
+
+# Creating boxplots :
+
+par(mfrow = c(1, 3))
+
+boxplot(obesity$Weight, ylab = "Weight")
+boxplot(obesity$Height, ylab = "Height")
+boxplot(obesity$Age, ylab = "Age")
+
+```
+
+Looking at the histograms above, we notice that the variable `Height` seems to follow a normal distribution as the curve has a nice bell shape and seems to be centered around the mean. The variables `Age` and `Weight` seem to be right skewed, however, `Age` is more skewed than `Weight`.
+
+&nbsp;
+
+Looking at the boxplots above we notice an outlier for `Weight` and `Height`. However, because of the nature of the variables, and because the outliers do not seem extreme, we will not remove them.
+
+&nbsp;
+
+In order to further the Exploratory Data Analysis, we will follow with barplots. These barplots will give us an indication of the distribution of each of the categorical variables. 
+
+```{r}
+
+# Barplots :
+
+plot_1 = ggplot(data=obesity_bin, aes(x=NObeyesdad)) + 
+  geom_bar(aes(y = ..count.., group = 1)) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
+
+plot_2 = ggplot(data=obesity_bin, aes(x=main_meals)) + 
+  geom_bar(aes(y = ..count.., group = 1)) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
+
+plot_3 = ggplot(data=obesity_bin, aes(x=Gender)) + 
+  geom_bar(aes(y = ..count.., group = 1)) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
+
+plot_4 = ggplot(data=obesity_bin, aes(x=family_history)) + 
+  geom_bar(aes(y = ..count.., group = 1)) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
+
+plot_5 = ggplot(data=obesity_bin, aes(x=vegetables)) + 
+  geom_bar(aes(y = ..count.., group = 1)) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
+
+plot_6 = ggplot(data=obesity_bin, aes(x=food_inbetween)) + 
+  geom_bar(aes(y = ..count.., group = 1)) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
+
+plot_7 = ggplot(data=obesity_bin, aes(x=tech_devices)) + 
+  geom_bar(aes(y = ..count.., group = 1)) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
+
+plot_8 = ggplot(data=obesity_bin, aes(x=eat_caloric)) + 
+  geom_bar(aes(y = ..count.., group = 1)) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
+
+plot_9 = ggplot(data=obesity_bin, aes(x=SMOKE)) + 
+  geom_bar(aes(y = ..count.., group = 1)) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
+
+plot_10 = ggplot(data=obesity_bin, aes(x=CH2O)) + 
+  geom_bar(aes(y = ..count.., group = 1)) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
+
+plot_11 = ggplot(data=obesity_bin, aes(x=monitor_cal)) + 
+  geom_bar(aes(y = ..count.., group = 1)) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
+
+plot_12 = ggplot(data=obesity_bin, aes(x=physical_act)) + 
+  geom_bar(aes(y = ..count.., group = 1)) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
+
+plot_13 = ggplot(data=obesity_bin, aes(x=alcohol)) + 
+  geom_bar(aes(y = ..count.., group = 1)) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
+
+plot_14 = ggplot(data=obesity_bin, aes(x=MTRANS)) + 
+  geom_bar(aes(y = ..count.., group = 1)) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=2.2)
+
+
+# Arranging them two-by-two :
+
+grid.arrange(plot_1, plot_2, ncol=2)
+grid.arrange(plot_3, plot_4, ncol=2)
+grid.arrange(plot_5, plot_6, ncol=2)
+grid.arrange(plot_7, plot_8, ncol=2)
+grid.arrange(plot_9, plot_10, ncol=2)
+grid.arrange(plot_11, plot_12, ncol=2)
+grid.arrange(plot_13, plot_14, ncol=2)
+
+```
+
+&nbsp;
+
+From the barplots above, we notice that there are some severe under representation problems. For instance, there is only one individual (out of 2111) that always drinks alcohol. Certainly, the weight won't be very well predicted if only one individual answers "always" to the question "How often do you drink alcohol?". This also means that this variable will be almost a constant when we will dummify the main variable `alcohol`, and so it won't provide much information. This could potentially be hazardous for the analysis, since the only warnings we have got came from a "preProcess" functionality inside the "caret" function "train()", stating : *No variation for: alcohol_always*
+
+&nbsp;
+
+The only variables that seem to be evenly distributed are `NObeyesdad` and `Gender`. The other variables seem to have drastic differences within the sub-groups of each variables. 
+
+As mentioned previously, we also have variables such as `tech_devices` and `physical_act` that were inteded to have a certain number of sub-groups in the questionnaire but that no do have any observations for a particular sub-group. The variable `tech_devices` only has observations for the initial subgroup of "1-2 hours" and `physical_act` only has observations for the first three sub-groups ('I do not have', '1 or 2 days', '3 or 4 days'). 
+
+This strange distribution of observations led us to perform some data restructuration, which was explained in the data pre-processing step.
+
+
+&nbsp;
+
+
+
+For the last plot of the exploratory data analysis, we will have a look at the correlations between the numerical variables.
+
+```{r}
+
+# Correlation plot
+
+cor.plot(na.omit(obesity [c(2,3,4)]))
+
+```
+
+As expected, there is a positive correlation between weight and height.
+
+The correlation between weight and age is also positive and the Pearson coefficient is 0.2... However we may expect a quadratic (and not linear) behavior. For instance since the older we get, the more we weight until we reach a certain threshold and start loosing weight(maybe at around 70 years of age).
+
+There does not seem to be a strong correlation between the numerical variables of the dataset.
+
+&nbsp;
+
+
+# Model fitting
+
+## Multiple Linear Regression
+
+We begin with a multiple linear regression model. We will first run a full model with (n-1) dummy categories included for each variable. In most cases, the dummy that was excluded from the formula was the dummy which referred to the variable category "no" or equivalent. For instance, for the variable alcohol, we excluded the variable alcohol_no from the model formula.
+
+
+```{r}
+
+# Linear regression
+
+lm_weight <- lm(Weight ~ Gender + Age + Height + family_hist + eat_caloric + vegetables_sometimes +vegetables_always + main_meals_Btw_1_2 + main_meals_More_than_3 + food_inbetween_always + food_inbetween_frequently + food_inbetween_sometimes + smoke + CH2O_between_1_and_2 + CH2O_more_than_2 + monitor_cal + physical_act_1_2 +physical_act_2_4 + tech_1_hour+ tech_2_hours_or_more + alcohol_always + alcohol_frequently + alcohol_sometimes + mtrans_automobile + mtrans_bike + mtrans_public_transportation  , data = train.set)
+
+summary(lm_weight)
+plot(lm_weight)
+
+```
+
+This first model seems to fulfill the required assumptions. 
+
+When looking at the "normal q-q plot" the residuals are fairly well aligned, indicating that they are normally distributed. When looking at the "residuals vs fitted values" plot, the residuals seem to follow a pattern, however it is not clearly distinguishable whether this patter is linear or not. When looking at the scale-location plot, the residuals are fairly well spread above and below the red line, therefore, indicating that there is presence of equal variance along the regression line. Finally, when looking at the "residuals vs leverage" plot, we do notice some outliers that stray from the regression line. However, since these outliers all seem to be within the Cook's distance, we will not treat them as outliers.
+
+&nbsp;
+
+Looking at the model above, we have quite a lot of variables that are significant at a confidence level of 95%. The variables that are not significant are: `food_inbetween_always`, `food_inbetween_sometimes`, `smoke`, `CH2O_between_1_and_2`, `tech_1_hour`, `alcohol_always`, `alcohol_frequently`, `mtrans_bike` and `mtrans_public_transportation`.
+
+&nbsp;
+
+Because there are many significant variables, we will not interpret all of them. Instead, we will interpret some coefficients that we find interesting.
+
+* **Age** : an increase of 1 year of age corresponds to an average increase of 0.812 kg in weight, ceteris paribus.
+
+* **main_meals_Btw_1_2** : an individual that eats between 1 and 2 main meals per day has an average decrease of 5.508 Kg in comparison to an individual that eats three main meals per day, ceteris paribus.
+
+&nbsp;
+
+Because we wish to select the best possible model for the linear regression, we will proceed with the stepwise selection method, in order to choose the most appropriate model. We will run a forward, backward, and both model selection.
+
+
+```{r}
+
+# Stepwise model selection
+
+# Forward
+lm_forward_obesity <- step(lm_weight, direction = "forward")
+summary(lm_forward_obesity)
+
+# AIC: 6999.41
+
+# Model: Weight ~ Gender + Age + Height + family_hist + eat_caloric + vegetables_sometimes + vegetables_always + main_meals_Btw_1_2 + main_meals_More_than_3 + food_inbetween_always + food_inbetween_frequently + food_inbetween_sometimes + smoke + CH2O_between_1_and_2 + CH2O_more_than_2 + monitor_cal + physical_act_1_2 + physical_act_2_4 + tech_1_hour + tech_2_hours_or_more + alcohol_always + alcohol_frequently + alcohol_sometimes + mtrans_automobile + mtrans_bike + mtrans_public_transportation
+
+
+# Backward
+lm_backward_obesity <- step(lm_weight, direction = "backward")
+summary(lm_backward_obesity)
+
+# AIC: 6988.52
+
+# Model: Weight ~ Gender + Age + Height + family_hist + eat_caloric + vegetables_sometimes + vegetables_always + main_meals_Btw_1_2 +  main_meals_More_than_3 + food_inbetween_frequently + CH2O_more_than_2 + monitor_cal + physical_act_1_2 + physical_act_2_4 + tech_1_hour + tech_2_hours_or_more + alcohol_sometimes + mtrans_automobile + mtrans_public_transportation
+
+
+
+# Both
+lm_both_obesity <- step(lm_weight, direction = "both")
+summary(lm_both_obesity)
+
+# AIC: 6988.52
+
+# model: Weight ~ Gender + Age + Height + family_hist + eat_caloric + vegetables_sometimes + vegetables_always + main_meals_Btw_1_2 + main_meals_More_than_3 + food_inbetween_frequently + CH2O_more_than_2 + monitor_cal + physical_act_1_2 + physical_act_2_4 + tech_1_hour + tech_2_hours_or_more + alcohol_sometimes + mtrans_automobile + mtrans_public_transportation
+
+
+```
+
+
+For the forward model, the stepwise selection shows us that the best model is: 
+
+&nbsp;
+
+**Weight ~ Gender + Age + Height + family_hist + eat_caloric + vegetables_sometimes + vegetables_always + main_meals_Btw_1_2 + main_meals_More_than_3 + food_inbetween_always + food_inbetween_frequently + food_inbetween_sometimes + smoke + CH2O_between_1_and_2 + CH2O_more_than_2 + monitor_cal + physical_act_1_2 + physical_act_2_4 + tech_1_hour + tech_2_hours_or_more + alcohol_always + alcohol_frequently + alcohol_sometimes + mtrans_automobile + mtrans_bike + mtrans_public_transportation**
+
+&nbsp;
+
+This is in fact the same model as the full model. It has an AIC of 6999.41, an R-Squared of 0.6464 and an ajusted R-Squared of 0.639.
+
+&nbsp;
+
+For the backward model, the stepwise selection shows us that the best model is: 
+
+&nbsp;
+
+**Weight ~ Gender + Age + Height + family_hist + eat_caloric + vegetables_sometimes + vegetables_always + main_meals_Btw_1_2 +  main_meals_More_than_3 + food_inbetween_frequently + CH2O_more_than_2 + monitor_cal + physical_act_1_2 + physical_act_2_4 + tech_1_hour + tech_2_hours_or_more + alcohol_sometimes + mtrans_automobile + mtrans_public_transportation**
+
+&nbsp;
+
+This model is a reduced version of the full model. The AIC is 6988.52, the R-Squared is 0.6455 and the adjusted R-Squared is 0.6401.
+
+&nbsp;
+
+For the both model we obtain the same results as the backward model. The best model is: 
+
+&nbsp;
+
+**Weight ~ Gender + Age + Height + family_hist + eat_caloric + vegetables_sometimes + vegetables_always + main_meals_Btw_1_2 + main_meals_More_than_3 + food_inbetween_frequently + CH2O_more_than_2 + monitor_cal + physical_act_1_2 + physical_act_2_4 + tech_1_hour + tech_2_hours_or_more + alcohol_sometimes + mtrans_automobile + mtrans_public_transportation**
+
+&nbsp;
+
+This model is a reduced version of the full model. The AIC is 6988.52, the R-Squared is 0.6455 and the adjusted R-Squared is 0.6401.
+
+&nbsp;
+
+When looking at all three models, the best model would seem to be the backward model(or the both model). It's adjusted R-Squared is higher than the forward model by very little but is reduced and therefore favorable. We have very similar results and insights from all three models but the backward model and the both model allow us to obtain those insights without having to drag around those variables that are not significant.
+
+&nbsp;
+
+To confirm our choice of model for the linear regression, we will proceed with the validation of the accuracy of the predictions on the validation set with the help of 3 metrics: RMSE, Mean error and MAPE.
+
+
+```{r}
+
+# Predictions on the validation set
+
+# Forward model:
+forward_pred_obesity <- predict(lm_forward_obesity, valid.set)
+
+# RMSE
+gofRMSE(valid.set$Weight, forward_pred_obesity, dgt = 3) # 16.376
+# Mean error
+gofME(valid.set$Weight, forward_pred_obesity, dgt = 3) # 1.038
+# MAPE
+gofMAPE(valid.set$Weight, forward_pred_obesity, dgt = 3) # 16.344
+
+
+# Backward model:
+backward_pred_obesity <- predict(lm_backward_obesity, valid.set)
+
+# RMSE
+gofRMSE(valid.set$Weight, backward_pred_obesity, dgt = 3) # 16.416
+# Mean error
+gofME(valid.set$Weight, backward_pred_obesity, dgt = 3) # 1.002
+# MAPE
+gofMAPE(valid.set$Weight, backward_pred_obesity, dgt = 3) # 16.363
+
+
+# Both model:
+both_pred_obesity <- predict(lm_both_obesity, valid.set)
+
+# RMSE
+gofRMSE(valid.set$Weight, both_pred_obesity, dgt = 3) # 16.416
+# Mean error
+gofME(valid.set$Weight, both_pred_obesity, dgt = 3) # 1.002
+# MAPE
+gofMAPE(valid.set$Weight, both_pred_obesity, dgt = 3) # 16.363
+
+```
+
+
+Just as we had mentioned above, the backward model and the both model seem to represent the best model for our data. The difference in the three metrics for each model are very very small. This enables us to choose the backward/both model as the best model, since it yields very similar results as the full model, without all the cumbersome variables that are not relevant in the full (forward) model.
+
+
+&nbsp;
+
+
+## k-Nearest Neighbors
+
+The package used to proceed with the KNN model is the "caret" package. This package enables us to:
+
+* Normalize the data (by creating a function , for instance).
+
+* Creating a function to de-normalize the data (in order to have a final prediction which is on the adequate scale).
+
+* Manually selecting the best "k" parameter (= number of neighbors) though comparison of the RMSE for different values of k. The k parameter which yields the smallest RMSE will be the best one.
+
+* Running the model with the best "k".
+
+
+With the "caret" package, we will use the "train()" function to run our model.
+
+```{r}
+
+# Running the k-NN model :
+
+set.seed(1)
+
+trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
+
+set.seed(1)
+
+k_nn <-
+    train(
+        Weight ~ .,
+        data = train.set,
+        method = "knn",
+        trControl=trctrl,
+        preProcess = c("range")
+        
+    )
+
+
+predicted = predict(k_nn, valid.set)
+
+```
+
+A 10-fold Cross-Validation has been repeated 3 times, and the smallest RMSE was found when k = 5.
+
+The resulting RMSE is equal to 13.53326
+
+&nbsp;
+
+We will then proceed with a Regression Tree and  compare its RMSE with the RMSE of the KNN.
+
+
+&nbsp;
+
+## Regression Tree
+
+We will first focus on selecting the appropriate value for the Complexity Parameter (CP hereafter), which is a "penalty" factor concerning the size of the tree. A smaller CP will result in a bigger tree, and vice versa.
+
+To do this, we will do a Cross-Validation approach. The computer will create many different partitions of the dataset into training and validation, and we want to find the CP that corresponds to the minimum Cross-Validation error.
+
+This procedure is meant to help addressing the "tree instability" issue.
+
+```{r}
+
+# First run a quite big tree (CP = 0.00001) :
+
+set.seed(1)
+
+tree_1 <- rpart(
+   Weight ~ .,
+   data = train.set,
+   method = "anova",
+   control = rpart.control(
+      cp = 0.00001,
+      minbucket = 1,
+      maxdepth = 10
+   )
+)
+
+
+# We do a CV : must locate in the table the point from which the CV error starts to rise :
+
+printcp(tree_1)
+
+```
+
+We can see from the results above that, in this case, the CV error starts to rise when CP = 0.0046777.
+
+But, there is a standard error in that point estimate! If we do $0.22768 + 0.013597 = 0.241277$
+
+So, we can go for a SMALLER (and thus better) tree with 19 splits instead of 24, which corresponds to a CP of 0.0051561.
+
+
+Given the insight collected above, we will fit the final prediction tree with a CP of 0.0051561, which is the best value for CP since it was calculated with a Cross-Validation approach.
+
+```{r}
+
+set.seed(1)
+
+tree_2 <- rpart(
+   Weight ~ .,
+   data = train.set,
+   method = "anova",
+   control = rpart.control(
+      cp = 0.0051561,
+      minbucket = 1,
+      maxdepth = 10
+   )
+)
+
+plot_tree = prp(
+   tree_2,
+   type = 1,
+   extra = 1,
+   under = TRUE,
+   split.font = 1,
+   varlen = -10
+)
+
+
+```
+
+
+
+We will then compare the RMSE for the validation and training sets. 
+
+```{r}
+
+# First, let's create two vectors, one for the predicted values, and another for the actual values :
+
+predicted_train <- predict(tree_2, train.set)
+
+actual_train <- train.set$Weight
+
+
+# And lastly, we make use of the RSME formula to calculate it :
+
+RMSE_train = sqrt(mean((predicted_train-actual_train)^2))
+
+RMSE_train
+
+```
+
+We have a RMSE = 11.29379 for the training set.
+
+
+We will do the same for the validation set.
+
+```{r}
+
+predicted_valid <- predict(tree_2, valid.set)
+
+actual_valid <- valid.set$Weight
+
+
+RMSE_valid = sqrt(mean((predicted_valid-actual_valid)^2))
+
+RMSE_valid
+
+```
+
+The RMSE for the validation set is 13.25937.
+
+It is very normal that the RMSE is smaller for the training data, because we have selected the optimal CP according to the training data. However, the difference is not too big. 
+
+The RMSE which is of interest is the one for the validation set, since the validation data is "fresh and new", has not been used to adjust the model.
+
+&nbsp;
+
+Producing some boxplots will help us visualize and compare the performance of the tree on both sets (training and validation).
+
+```{r}
+
+par(mfrow = c(1, 2))
+
+boxplot(
+   predicted_train,
+   actual_train,
+   names = c("Predicted", "Actual"),
+   ylab = "Weight",
+   xlab = "Training Set"
+)
+
+boxplot(
+   predicted_valid,
+   actual_valid,
+   names = c("Predicted", "Actual"),
+   ylab = "Weight",
+   xlab = "Validation Set"
+)
+
+```
+
+To the naked eye, it is difficult to judge on which set the tree has performed better, by just looking at the boxplots. We assume that the higher value of RMSE for the validation set is due to the presence of an outlier. The training set boxplot seems a bit right skewed, so one could conclude that the validation set did even a better job.
+
+This concludes the Regression Tree model. 
+&nbsp;
+
+ 
+
+&nbsp;
+&nbsp;
+
+
+In order to further the analysis, we will do a comparison of both KNN and regression tree on the validation set. We will plot the errors "across the models", meaning the difference between the predicted weights by both models.
+
+```{r}
+
+plot(predicted-predicted_valid, ylab = "Error across models")
+  abline(h = 10)
+  abline(h = -10)
+
+```
+
+We can see that although there is quite a lot of variance, at times both models seem to behave almost equally at predicting the weight. Inside the range of [-10 ; 10] there seems to be the majority of the points, so the range of prediction is not too wide.
+
+&nbsp;
+
+To deepen the understanding of this comparison, we will have a more precise look at each method compared with the validation data.
+
+```{r}
+
+par(mfrow = c(1, 2))
+
+
+# For KNN :
+plot(predicted-valid.set[,4], main = "k-Nearest Neighbors", ylab = "Predicted - Actual (= error)")
+  abline(h = mean(predicted-valid.set[,4]))
+
+# For Regression tree :
+plot(predicted_valid-valid.set[, 4], main = "Regression Tree", ylab = "Predicted - Actual (= error)")
+  abline(h = mean(predicted_valid-valid.set[, 4]))
+
+```
+
+
+These results are very interesting. We notice that we have the typical trade-off between bias and variance. 
+
+Certainly, the k-NN seems to be more precise (less variance), since the points are less far apart from each other.The mean of the points (= errors) is at around 2, not 0. This indicates that there is a small bias in the k-NN model.
+
+However, the regression tree has more variance, yet, on average it is very precise (the mean of the errors is almost at zero). The mean of the errors for the Regression Tree is closer to zero than the mean of the errors of the KNN model.
+
+```{r}
+
+# For k-NN :
+mean(predicted-valid.set[,4]) 
+
+
+# For tree :
+mean(predicted_valid-valid.set[, 4])
+
+
+```
+
+Having run the different models, we wish to choose which model is best suited for our analysis. Do we want a very accurate prediction although it may be around on average 2 Kg away from the truth? Or do we want a prediction which is very far from the truth but, taking into account all predictions, on average we are almost exactly on the target?
+
+&nbsp;
+
+We would probably want a model like the KNN, since an error of 2 Kg  is not much given the context.
+
+While the regression tree is less biased and has smaller RMSE, it's  amount of error is very big (the differences predicted - actual are quite big). Therefore, at this moment in the analysis, the KNN seems to be the best model.
+
+&nbsp;
+
+Because we wish to further our analysis, we will continue with an ensemble method.
+
+
+## Ensemble Method (MLR + k-NN + Regression Tree)
+
+The aim of this ensemble method is to combine the Multiple Linear Regression model, the KNN model and the Regression Tree model in order to obtain even better results. This combination of methods will be done by taking the average prediction of the variable of interest ("Weight").
+
+This means that the predicted weight using this ensemble method will be obtained by running the three methods separately and then taking the average over the results.
+
+```{r}
+
+# Creating dataframe :
+
+ensemble_df <-
+  data.frame(
+    actual = valid.set[, 4],
+    MLR = backward_pred_obesity,
+    knn = predicted,
+    Regression_tree = predicted_valid,
+    Ensemble_Method = (predicted + predicted_valid + backward_pred_obesity) / 3
+  )
+
+pander(head(ensemble_df))
+
+```
+
+We created a dataframe with the prediction of each of the four models.
+
+
+```{r}
+
+RMSE_ensemble = sqrt(mean((ensemble_df[, 5] - valid.set[, 4])^2))
+
+RMSE_ensemble
+
+
+RMSE_total.df = data.frame(
+  
+    RMSE_MLR = 16.416,
+    RMSE_kNN = 13.53326,
+    RMSE_Tree = 13.25937,
+    RMSE_Ensemble = 12.05331
+   
+  )
+
+pander(RMSE_total.df)
+
+
+```
+
+The best model is the one with the smallest RMSE, in this case, the ensemble method. This result is not surprising, since ensemble techniques usually perform better than individual models.
+
+
+&nbsp;
+&nbsp;
+
+# Conclusions
+
+## Discussion of the prediction results
+
+When we initially proposed our project, we wanted to carry our analysis with a logistical regression model, a classification tree, a KNN and an ensemble method. 
+
+Upon inspection of the dataset, we switched the logistic regression for a multiple linear regression, and the classification tree for a regression tree, since the nature of the dependent variable changed from categorical to numerical and continuous. Indeed, we first expected to use the variable `NObeyesdad` as the dependent variable but when we became aware of possible multicolinearity issues, we thought it best to use the variable `Weight` instead. The dependent variable, initially chosen to be a categorical variable, changed to a numerical variable, hence why we changed the models chosen in our project proposal. 
+
+&nbsp;
+
+The **linear regression model**, while interesting, did not turn out to be of great use at predicting the weight. The linear regression model had in fact the highest RMSE, and the predictions are very often far away from the true weight. The **KNN model** and the **Regression Tree model** had very similar RMSE values. These two models helped us visualize the trade-off between bias and variance, which ultimately led us to favor the KNN model over the Regression Tree model. 
+
+Finally, the **Ensemble method**, is without a doubt the best one in the case of our analysis. The RMSE value for the ensemble method was the lowest out of the four models. This does not come as a surprise, as we were expecting these results.
+
+&nbsp;
+&nbsp;
+
+## Issues
+
+As mentioned in the beginning of this analysis, we were lucky to have a dataset of fairly good quality. However, we believe there are many other issues beyond the simple quality of the data that had important roles in the outcomes of the predictions.
+
+&nbsp;
+
+First, the data was collected from individuals in the cities of Barranquilla (Colombia), Lima (Peru) and Mexico City (Mexico). We believe that there are strong differences in culture, socio-economic status, traditions and lifestyles between the individuals in Latin America countries and European/North American individuals. 
+
+This could potentially affect the prediction of the weight of individuals that are not currently immersed in the latin american country characteristics in regards to lifestyle, culture, socio-economic status and traditions that the questionnaire questions touch upon. For instance, the variable `tech_devices` only had observations for the sub-group "1 to 2 hours" of use of technological devices. In 2021, this seems like a rather low number of hours to spend on tech_devices based on North American daily usage of tech devices (https://www.vox.com/recode/2020/1/6/21048116/tech-companies-time-well-spent-mobile-phone-usage-data). 
+
+Could this very low number of hours spend on tech devices in our dataset be explained by the availability of tech devices in Latin American countries? Could it be explained by the socio-economic status of the individuals in the dataset? Many variables in the dataset seem to have confounding factors that are not represented within the data set. 
+
+&nbsp;
+
+This brings us to the second issue found within the dataset. The questions in the questionnaire were not clear and were not representative of the expected answer. For instance, the question related to the variable `tech_devices` was: "How much time do you use technological devices such as cell phone, videogames, television, computer and other?". This question is extremely vague as there is no set time-frame for the use of technological devices. Does this question refer to a daily usage or a weekly usage? We find this same issue for most of the questions in the questionnaire, for example for the "alcohol" question : "How often do you drink alcohol?", it is not clear to which time frame we are referring to. 
+
+The fact of having vague questions certainly meant that people with the same characteristics would answer differently to the same questions, thus creating biased predictions.
+
+&nbsp;
+
+Our third issue with the dataset and the overall approach to weight classification in the study that we based ourselves upon is the calculation used for weight classification, namely the **Body Mass Index**.
+
+In the original study, the dependent variable was `NObeyesdad`, which was composed of sub-groups of different weight categories. However the weight categories were assigned based on the calculation of the Body Mass Index. It is known that the BMI is not an accurate weight classification tool, since it does not factor body fat percentage and muscle percentage. This often leads to missclassification. For instance, a short female with strong muscle could be classified as overweight when she is in fact very healthy. This is largely based on the fact that muscle is heavier than fat (https://www.cdc.gov/obesity/downloads/bmiforpactitioners.pdf). 
+
+In addition to possible multicollinearity issue in regards to the variable `NObeyesdad`, this is why we chose to predict the weight instead of the class of weight. 
+
+&nbsp;
+
+Keeping these three issues in mind, we believe that the inclusion of more insightful variables such as one's perception of their own weight class, or body fat percentage, or more precise variables, would enrich our models and our analysis. Ideally, if we had controlled the data collection process, we would have included more questions to the questionnaire, such as income-related questions, in order to control for some confounding variables(income is simultaneously related to the variable `MTRANS` and  `Weight`). Furthermore, we would also have chosen a different weight classification method than the BMI.
+
+
+&nbsp;
+&nbsp;
+
+In conclusion, although the data we used could be improved in terms of data collection, we still found it interesting to fit different prediction models to the data. This analysis helped us understand that daily habits have a strong impact on the weight. However, there are also other factors that come into play when looking into weight prediction. Our hope is that this analysis will help individuals looking to lose weight, understand that their weight loss is not only related to what they eat and how they exercise.
+
+
+&nbsp;
+&nbsp;
+
+# Shiny App
+
+In the spirit of adding an interactive component to our analysis, we created a Shiny App in which an individual can enter his/her characteristics based on the questionnaire questions and have his/her weight predicted. 
+
+With the predicted value of the weight, the BMI is then calculated using this formula : $BMI = \frac{Weight}{Height^2}$ 
+
+With the BMI value, the individual's weight is then classified into one of the weight classes defined by the CDC (https://www.cdc.gov/obesity/adult/defining.html). Within the Shiny App, the individual has a choice of which method he/she wishes to use to predict the weight. 
+
+&nbsp;
+
+The Shiny App is available here : https://angeltomasripoll.shinyapps.io/weight_predictor/
+
+&nbsp;
+&nbsp;
