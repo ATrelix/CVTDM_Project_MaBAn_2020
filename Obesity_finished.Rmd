@@ -159,7 +159,7 @@ Finally, there is a **Shiny App** available (here : https://angeltomasripoll.shi
 
 The user will also be able to select the type of model that will predict the results. That way, it will be interesting to see, with just a few clicks, how each model will yield different results.
 
-The Shiny App will calculate the Body Mass Index ( $ = Weight / Height^2 $) and classify the person according to the Centers for Disease Control and Prevention (CDC) classification (https://www.cdc.gov/obesity/adult/defining.html).
+The Shiny App will calculate the Body Mass Index ($BMI = \frac{Weight}{Height^2}$) and classify the person according to the Centers for Disease Control and Prevention (CDC) classification (https://www.cdc.gov/obesity/adult/defining.html).
 
 
 &nbsp;

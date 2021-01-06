@@ -482,7 +482,7 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                          
                          br(),
                          paste("Our paper (in .pdf) can be downloaded "),
-                         tags$a(href="https://mega.nz/file/9RZxiCgL#VBuGYUgyLanGWP1R7XeIG4mO_sDSlbx2HJW6OfwslXw", "here"),
+                         tags$a(href="https://mega.nz/file/4YQ0ULgK#4jBpm6ovnEw1RaibroSVGdM9Q9UGvBW0MA01-05HI0g", "here"),
                               
                          br(),
                          br(),

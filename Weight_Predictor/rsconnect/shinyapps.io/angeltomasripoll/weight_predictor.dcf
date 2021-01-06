@@ -5,9 +5,9 @@ account: angeltomasripoll
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 3447777
-bundleId: 4065682
+bundleId: 4065870
 url: https://angeltomasripoll.shinyapps.io/weight_predictor/
-when: 1609961700.28529
+when: 1609965083.11649
 asMultiple: FALSE
 asStatic: FALSE
 ignoredFiles: data/Obesity.csv
